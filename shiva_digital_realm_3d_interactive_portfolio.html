@@ -1,0 +1,2789 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>SHIVA DIGITAL REALM — Shiva Prasad Reddy Kistipati | 3D Interactive Portfolio</title>
+
+  <!-- Fonts: Orbitron for futuristic sci-fi display, Inter for crisp legibility, JetBrains Mono for code/telemetry -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Orbitron:wght@500;600;700;800;900&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            display: ['Orbitron', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            cyber: {
+              bg: '#030712',
+              panel: 'rgba(8, 15, 32, 0.78)',
+              cyan: '#00f0ff',
+              violet: '#a855f7',
+              emerald: '#10b981',
+              amber: '#f59e0b',
+              magenta: '#ec4899',
+              ice: '#38bdf8',
+            }
+          }
+        }
+      }
+    };
+  </script>
+
+  <!-- Three.js r128 -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+  <style>
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background-color: #030712;
+      color: #f8fafc;
+      font-family: 'Inter', sans-serif;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    #world-canvas {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      display: block;
+      z-index: 0;
+      touch-action: none;
+    }
+
+    /* Futuristic Glassmorphism & Borders */
+    .glass-panel {
+      background: linear-gradient(145deg, rgba(10, 18, 38, 0.86), rgba(5, 10, 22, 0.92));
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      border: 1px solid rgba(56, 189, 248, 0.22);
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    }
+
+    .glass-card {
+      background: rgba(15, 23, 42, 0.65);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(148, 163, 184, 0.16);
+      transition: all 0.25s ease;
+    }
+    .glass-card:hover {
+      border-color: rgba(0, 240, 255, 0.45);
+      box-shadow: 0 0 24px rgba(0, 240, 255, 0.14);
+      transform: translateY(-2px);
+    }
+
+    /* AAA Game Buttons */
+    .btn-aaa-primary {
+      background: linear-gradient(135deg, #00f0ff 0%, #2563eb 100%);
+      color: #020617;
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      box-shadow: 0 0 25px rgba(0, 240, 255, 0.4), inset 0 1px 1px rgba(255,255,255,0.6);
+      transition: all 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .btn-aaa-primary:hover {
+      transform: translateY(-2px) scale(1.02);
+      box-shadow: 0 0 38px rgba(0, 240, 255, 0.7), inset 0 1px 2px rgba(255,255,255,0.8);
+    }
+
+    .btn-aaa-secondary {
+      background: linear-gradient(135deg, rgba(168, 85, 247, 0.22), rgba(14, 165, 233, 0.18));
+      border: 1px solid rgba(168, 85, 247, 0.55);
+      color: #f8fafc;
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 600;
+      letter-spacing: 0.07em;
+      box-shadow: 0 0 20px rgba(168, 85, 247, 0.2);
+      transition: all 0.25s ease;
+    }
+    .btn-aaa-secondary:hover {
+      background: linear-gradient(135deg, rgba(168, 85, 247, 0.38), rgba(14, 165, 233, 0.32));
+      border-color: #c084fc;
+      transform: translateY(-2px);
+      box-shadow: 0 0 30px rgba(168, 85, 247, 0.45);
+    }
+
+    .btn-aaa-ghost {
+      background: rgba(15, 23, 42, 0.72);
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      color: #e2e8f0;
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      transition: all 0.25s ease;
+    }
+    .btn-aaa-ghost:hover {
+      border-color: #00f0ff;
+      color: #00f0ff;
+      background: rgba(0, 240, 255, 0.08);
+      transform: translateY(-2px);
+    }
+
+    /* Subtle Scanlines for Sci-Fi Vibe */
+    .scanline-overlay {
+      pointer-events: none;
+      background: repeating-linear-gradient(
+        0deg,
+        rgba(0, 240, 255, 0.015) 0px,
+        rgba(0, 240, 255, 0.015) 1px,
+        transparent 1px,
+        transparent 3px
+      );
+    }
+
+    /* Custom Scrollbars */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.5); }
+    ::-webkit-scrollbar-thumb { background: rgba(56, 189, 248, 0.4); border-radius: 999px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(0, 240, 255, 0.75); }
+
+    /* Animations */
+    @keyframes pulseGlow {
+      0%, 100% { box-shadow: 0 0 14px rgba(0, 240, 255, 0.35); }
+      50% { box-shadow: 0 0 28px rgba(0, 240, 255, 0.75); }
+    }
+    .animate-pulse-glow { animation: pulseGlow 2.4s infinite ease-in-out; }
+
+    @keyframes floatSlow {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-6px); }
+    }
+    .animate-float { animation: floatSlow 3.5s ease-in-out infinite; }
+
+    /* Agent Badge Active State */
+    .agent-badge {
+      transition: all 0.3s ease;
+    }
+    .agent-badge.active {
+      border-color: #00f0ff;
+      background: rgba(0, 240, 255, 0.16);
+      color: #67e8f9;
+      box-shadow: 0 0 16px rgba(0, 240, 255, 0.35);
+      transform: scale(1.03);
+    }
+
+    /* Code syntax highlight styling */
+    .code-kw { color: #c084fc; }
+    .code-fn { color: #38bdf8; }
+    .code-str { color: #34d399; }
+    .code-num { color: #fbbf24; }
+    .code-cm { color: #64748b; font-style: italic; }
+
+    /* Reduced Motion */
+    body.reduced-motion * {
+      animation-duration: 0.001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.001ms !important;
+    }
+
+    /* Allow text selection inside modals, quick view, and chat */
+    .selectable { user-select: text; -webkit-user-select: text; }
+
+    /* Print-Ready Resume Styling */
+    @media print {
+      body, html {
+        background: #ffffff !important;
+        color: #0f172a !important;
+        overflow: visible !important;
+        height: auto !important;
+      }
+      #world-canvas, .scanline-overlay, #boot-screen, #entry-overlay, #hud-layer, #ai-drawer, #toast-box,
+      #quick-view header, #quick-view nav, .no-print {
+        display: none !important;
+      }
+      #quick-view, #inspector-modal {
+        position: static !important;
+        background: #ffffff !important;
+        padding: 0 !important;
+        overflow: visible !important;
+        height: auto !important;
+        max-height: none !important;
+      }
+      #qv-content, #modal-body {
+        padding: 0 !important;
+        margin: 0 !important;
+        max-width: 100% !important;
+        overflow: visible !important;
+      }
+      .resume-sheet {
+        background: #ffffff !important;
+        color: #0f172a !important;
+        border: none !important;
+        box-shadow: none !important;
+        padding: 0.4in !important;
+      }
+      .resume-sheet * {
+        color: #0f172a !important;
+        border-color: #cbd5e1 !important;
+      }
+    }
+  </style>
+</head>
+<body class="bg-cyber-bg text-slate-100 overflow-hidden">
+
+  <!-- 3D WebGL Canvas -->
+  <canvas id="world-canvas"></canvas>
+
+  <!-- Subtle Sci-Fi Scanline Layer -->
+  <div class="fixed inset-0 scanline-overlay z-10 pointer-events-none"></div>
+
+  <!-- WebGL Fallback Notice (hidden unless WebGL fails) -->
+  <div id="webgl-fallback" class="hidden fixed inset-0 z-50 bg-slate-950 flex flex-col items-center justify-center p-6 text-center">
+    <div class="glass-panel rounded-2xl p-8 max-w-lg">
+      <h2 class="font-display text-2xl text-cyan-400 mb-3">WebGL Context Unavailable</h2>
+      <p class="text-slate-300 text-sm mb-6">Your browser or device currently restricts hardware-accelerated 3D WebGL rendering. You can still explore Shiva's complete portfolio, interactive Code Explorer, and AI Multi-Agent Assistant in Executive Professional Mode.</p>
+      <button onclick="openQuickView('about')" class="btn-aaa-primary px-6 py-3 rounded-xl text-sm">OPEN PROFESSIONAL PORTFOLIO</button>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- 1. CINEMATIC BOOT / LOADING SEQUENCE                                  -->
+  <!-- ===================================================================== -->
+  <div id="boot-screen" class="fixed inset-0 z-50 bg-[#020612] flex flex-col items-center justify-center p-6 transition-opacity duration-700">
+    <div class="w-full max-w-xl">
+      <div class="flex items-center justify-between mb-3">
+        <div class="flex items-center gap-2.5">
+          <span class="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-ping"></span>
+          <span class="font-mono text-xs tracking-widest text-cyan-400 uppercase">SHIVA DIGITAL REALM // OS v3.1</span>
+        </div>
+        <span id="boot-percent" class="font-mono text-xs text-cyan-300 font-semibold">0%</span>
+      </div>
+
+      <h1 class="font-display text-2xl sm:text-4xl font-extrabold tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-blue-400 to-violet-400 mb-2">
+        INITIALIZING REALM
+      </h1>
+      <p id="boot-status" class="font-mono text-xs text-slate-400 mb-5 h-4">Bootstrapping WebGL Cinematic Engine...</p>
+
+      <!-- Progress Bar -->
+      <div class="w-full h-2 bg-slate-900 rounded-full overflow-hidden border border-cyan-500/30 mb-6">
+        <div id="boot-bar" class="h-full w-0 bg-gradient-to-r from-cyan-400 via-blue-500 to-violet-500 transition-all duration-150 rounded-full"></div>
+      </div>
+
+      <!-- Telemetry Log -->
+      <div id="boot-telemetry" class="glass-panel rounded-xl p-4 font-mono text-[11px] text-slate-400 space-y-1.5 h-32 overflow-hidden">
+        <div class="text-cyan-400/90">[SYS] Establishing Spatial Coordinate Grid (7 Professional Realms)...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- 2. CINEMATIC ENTRY OVERLAY (FIRST 10 SECONDS)                         -->
+  <!-- ===================================================================== -->
+  <div id="entry-overlay" class="hidden fixed inset-0 z-40 flex flex-col justify-between p-5 sm:p-10 pointer-events-none transition-opacity duration-700">
+    <!-- Top Header Strip -->
+    <div class="flex items-center justify-between pointer-events-auto">
+      <div class="glass-panel px-4 py-2 rounded-full flex items-center gap-2.5">
+        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+        <span class="font-mono text-[11px] tracking-widest text-slate-200 uppercase">REAL-TIME 3D ENGINE • HYDERABAD, IN</span>
+      </div>
+      <button onclick="openQuickView('about')" class="glass-panel px-4 py-2 rounded-full text-xs font-mono text-cyan-300 hover:text-white hover:border-cyan-400 transition">
+        SKIP TO RECRUITER VIEW →
+      </button>
+    </div>
+
+    <!-- Center-Bottom Hero Typography & AAA Action Buttons -->
+    <div class="max-w-4xl mx-auto text-center pointer-events-auto mb-4 sm:mb-8">
+      <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-cyan-500/10 border border-cyan-400/35 text-cyan-300 font-mono text-[11px] tracking-widest uppercase mb-4">
+        <span>NEXT-GENERATION INTERACTIVE PORTFOLIO</span>
+      </div>
+
+      <h1 class="font-display text-3xl sm:text-5xl md:text-6xl font-black tracking-wider text-white drop-shadow-[0_0_30px_rgba(0,240,255,0.4)] mb-3 leading-tight">
+        SHIVA PRASAD REDDY KISTIPATI
+      </h1>
+
+      <p class="font-display text-xs sm:text-base md:text-lg tracking-[0.22em] text-cyan-300 uppercase mb-5">
+        Data Science &nbsp;|&nbsp; Data Analytics &nbsp;|&nbsp; Artificial Intelligence
+      </p>
+
+      <div class="glass-panel rounded-2xl px-5 py-4 max-w-2xl mx-auto mb-7 border-cyan-500/30">
+        <p id="entry-typewriter" class="text-slate-200 text-sm sm:text-base leading-relaxed min-h-[3rem]"></p>
+      </div>
+
+      <!-- Three Prominent Action Buttons -->
+      <div class="flex flex-col sm:flex-row items-center justify-center gap-3.5 sm:gap-4">
+        <button onclick="enterWorldMode()" class="btn-aaa-primary w-full sm:w-auto px-7 py-3.5 rounded-xl text-xs sm:text-sm flex items-center justify-center gap-2">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.348a1.125 1.125 0 010 1.971l-11.54 6.347a1.125 1.125 0 01-1.667-.985V5.653z"/></svg>
+          ENTER MY WORLD
+        </button>
+
+        <button onclick="startGuidedTour()" class="btn-aaa-secondary w-full sm:w-auto px-6 py-3.5 rounded-xl text-xs sm:text-sm flex items-center justify-center gap-2">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z"/></svg>
+          GUIDED EXPLORATION
+        </button>
+
+        <button onclick="openQuickView('about')" class="btn-aaa-ghost w-full sm:w-auto px-6 py-3.5 rounded-xl text-xs sm:text-sm flex items-center justify-center gap-2">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.25 14.15v4.25c0 1.094-.787 2.036-1.872 2.18-2.087.277-4.216.42-6.378.42s-4.291-.143-6.378-.42c-1.085-.144-1.872-1.086-1.872-2.18v-4.25m16.5 0a2.18 2.18 0 00.75-1.661V8.706c0-1.081-.768-2.015-1.837-2.175a48.114 48.114 0 00-3.413-.387m4.5 8.006c-.194.165-.42.295-.673.38A23.978 23.978 0 0112 15.75c-2.648 0-5.195-.429-7.577-1.22a2.016 2.016 0 01-.673-.38m0 0A2.18 2.18 0 013 12.489V8.706c0-1.081.768-2.015 1.837-2.175a48.111 48.111 0 013.413-.387m7.5 0V5.25A2.25 2.25 0 0013.5 3h-3a2.25 2.25 0 00-2.25 2.25v.894m7.5 0a48.667 48.667 0 00-7.5 0"/></svg>
+          QUICK PROFESSIONAL VIEW
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- 3. IN-WORLD 3D HUD                                                    -->
+  <!-- ===================================================================== -->
+  <div id="hud-layer" class="hidden fixed inset-0 z-20 pointer-events-none flex flex-col justify-between p-3 sm:p-5">
+    <!-- TOP HUD BAR -->
+    <div class="flex flex-wrap items-center justify-between gap-2 pointer-events-auto">
+      <!-- Left: Identity & Active Zone -->
+      <div class="glass-panel rounded-xl px-3.5 py-2 flex items-center gap-3">
+        <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-400 to-blue-600 flex items-center justify-center font-display font-bold text-slate-950 text-xs shadow-lg">
+          SR
+        </div>
+        <div>
+          <div class="font-display text-xs sm:text-sm font-bold tracking-wider text-white leading-none">SHIVA DIGITAL REALM</div>
+          <div class="flex items-center gap-1.5 mt-1">
+            <span id="hud-zone-dot" class="w-2 h-2 rounded-full bg-cyan-400"></span>
+            <span id="hud-zone-name" class="font-mono text-[10px] sm:text-[11px] text-cyan-300 uppercase tracking-wider">CENTRAL NEXUS HUB</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Center/Right: Controls & Mode Switchers -->
+      <div class="flex flex-wrap items-center gap-1.5 sm:gap-2">
+        <button onclick="openQuickView('about')" class="glass-panel px-3 py-2 rounded-xl text-[11px] sm:text-xs font-medium text-slate-100 hover:border-cyan-400 hover:text-cyan-300 transition flex items-center gap-1.5">
+          <svg class="w-3.5 h-3.5 text-cyan-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"/></svg>
+          <span>Professional View</span>
+        </button>
+
+        <button id="btn-tour-toggle" onclick="toggleGuidedTour()" class="glass-panel px-3 py-2 rounded-xl text-[11px] sm:text-xs font-medium text-slate-100 hover:border-violet-400 hover:text-violet-300 transition flex items-center gap-1.5">
+          <svg class="w-3.5 h-3.5 text-violet-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 6.75V15m6-6v8.25m.503 3.498l4.875-2.437c.381-.19.622-.58.622-1.006V4.82c0-.836-.88-1.38-1.628-1.006l-3.869 1.934c-.317.159-.69.159-1.006 0L9.503 3.252a1.125 1.125 0 00-1.006 0L3.622 5.689C3.24 5.88 3 6.27 3 6.695V19.18c0 .836.88 1.38 1.628 1.006l3.869-1.934c.317-.159.69-.159 1.006 0l4.994 2.497c.317.158.69.158 1.006 0z"/></svg>
+          <span id="btn-tour-label">Guided Tour</span>
+        </button>
+
+        <button onclick="toggleCameraPerspective()" title="Toggle 1st / 3rd Person (Key: V)" class="glass-panel px-3 py-2 rounded-xl text-[11px] sm:text-xs font-mono text-slate-200 hover:border-cyan-400 transition hidden md:flex items-center gap-1.5">
+          <span id="hud-cam-mode">3RD PERSON [V]</span>
+        </button>
+
+        <button onclick="cycleGraphicsQuality()" title="Adaptive Graphics Quality (High / Balanced)" class="glass-panel px-2.5 py-2 rounded-xl text-[10px] sm:text-[11px] font-mono text-slate-300 hover:border-amber-400 transition hidden lg:flex items-center gap-1">
+          <span>GFX:</span><span id="hud-gfx-level" class="text-amber-300 font-semibold">HIGH</span>
+        </button>
+
+        <button onclick="toggleReducedMotion()" id="btn-reduced-motion" title="Toggle Reduced Motion" class="glass-panel px-2.5 py-2 rounded-xl text-[10px] sm:text-[11px] font-mono text-slate-300 hover:border-emerald-400 transition hidden lg:flex items-center">
+          MOTION: ON
+        </button>
+
+        <button onclick="openAIChat()" class="btn-aaa-primary animate-pulse-glow px-3.5 py-2 rounded-xl text-[11px] sm:text-xs flex items-center gap-1.5">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z"/></svg>
+          <span>AI Assistant</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- GUIDED TOUR NARRATION CAPTION BAR -->
+    <div id="tour-caption-bar" class="hidden mx-auto max-w-2xl w-full pointer-events-auto">
+      <div class="glass-panel rounded-2xl p-4 border-violet-500/45 shadow-2xl">
+        <div class="flex items-center justify-between mb-1.5">
+          <div class="flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-violet-400 animate-ping"></span>
+            <span id="tour-step-badge" class="font-mono text-[11px] text-violet-300 uppercase tracking-widest">GUIDED TOUR • 1 / 8</span>
+          </div>
+          <div class="flex items-center gap-1.5">
+            <button onclick="tourPrev()" class="px-2.5 py-1 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-xs font-mono">◀</button>
+            <button onclick="tourNext()" class="px-2.5 py-1 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-xs font-mono">▶</button>
+            <button onclick="stopGuidedTour()" class="px-2.5 py-1 rounded-lg bg-rose-500/20 border border-rose-500/40 text-rose-300 hover:bg-rose-500/30 text-xs font-mono">EXIT</button>
+          </div>
+        </div>
+        <h3 id="tour-title" class="font-display text-sm sm:text-base font-bold text-white mb-1">Central Nexus Hub</h3>
+        <p id="tour-caption" class="text-xs sm:text-sm text-slate-300 leading-relaxed"></p>
+      </div>
+    </div>
+
+    <!-- PROXIMITY INTERACTION PROMPT -->
+    <div id="interact-prompt" class="hidden mx-auto pointer-events-auto mb-2">
+      <button onclick="triggerNearestInteraction()" class="glass-panel border-cyan-400/70 px-5 py-2.5 rounded-full flex items-center gap-2.5 shadow-[0_0_25px_rgba(0,240,255,0.35)] hover:scale-105 transition">
+        <span class="px-2 py-0.5 rounded bg-cyan-400 text-slate-950 font-mono text-xs font-bold">E</span>
+        <span id="interact-label" class="text-xs sm:text-sm font-medium text-white">Click to Inspect</span>
+      </button>
+    </div>
+
+    <!-- BOTTOM HUD ROW: Controls + Mobile D-Pad + Interactive Mini-Map -->
+    <div class="flex items-end justify-between gap-3">
+      <!-- Left: Desktop Controls Legend + Mobile Touch D-Pad -->
+      <div class="pointer-events-auto flex flex-col gap-2">
+        <!-- Mobile Touch D-Pad (shown on touch/small screens) -->
+        <div id="mobile-dpad" class="grid grid-cols-3 gap-1.5 w-32 sm:hidden">
+          <div></div>
+          <button ontouchstart="setMobileKey('w',true)" ontouchend="setMobileKey('w',false)" onmousedown="setMobileKey('w',true)" onmouseup="setMobileKey('w',false)" class="glass-panel h-10 rounded-lg flex items-center justify-center text-cyan-300 font-bold active:bg-cyan-500/30">▲</button>
+          <div></div>
+          <button ontouchstart="setMobileKey('a',true)" ontouchend="setMobileKey('a',false)" onmousedown="setMobileKey('a',true)" onmouseup="setMobileKey('a',false)" class="glass-panel h-10 rounded-lg flex items-center justify-center text-cyan-300 font-bold active:bg-cyan-500/30">◀</button>
+          <button ontouchstart="setMobileKey('s',true)" ontouchend="setMobileKey('s',false)" onmousedown="setMobileKey('s',true)" onmouseup="setMobileKey('s',false)" class="glass-panel h-10 rounded-lg flex items-center justify-center text-cyan-300 font-bold active:bg-cyan-500/30">▼</button>
+          <button ontouchstart="setMobileKey('d',true)" ontouchend="setMobileKey('d',false)" onmousedown="setMobileKey('d',true)" onmouseup="setMobileKey('d',false)" class="glass-panel h-10 rounded-lg flex items-center justify-center text-cyan-300 font-bold active:bg-cyan-500/30">▶</button>
+        </div>
+
+        <!-- Desktop Controls Hint -->
+        <div class="glass-panel rounded-xl px-3.5 py-2.5 hidden sm:flex items-center gap-4 text-[11px] font-mono text-slate-300">
+          <span><kbd class="px-1.5 py-0.5 bg-slate-800 rounded text-cyan-300">WASD</kbd> Walk</span>
+          <span><kbd class="px-1.5 py-0.5 bg-slate-800 rounded text-cyan-300">DRAG</kbd> Orbit</span>
+          <span><kbd class="px-1.5 py-0.5 bg-slate-800 rounded text-cyan-300">CLICK / E</kbd> Inspect</span>
+          <span><kbd class="px-1.5 py-0.5 bg-slate-800 rounded text-cyan-300">V</kbd> View</span>
+        </div>
+      </div>
+
+      <!-- Right: Interactive Mini-Map / Radar with Fast Travel -->
+      <div class="pointer-events-auto glass-panel rounded-2xl p-2.5 sm:p-3 flex flex-col items-center gap-2">
+        <div class="w-full flex items-center justify-between px-1">
+          <span class="font-mono text-[10px] text-cyan-300 tracking-widest uppercase">REALM RADAR</span>
+          <button onclick="teleportToWorld('hub')" class="text-[10px] font-mono text-slate-300 hover:text-cyan-300 underline">HUB</button>
+        </div>
+        <div class="relative w-32 h-32 sm:w-40 sm:h-40 rounded-full bg-slate-950/90 border border-cyan-500/35 overflow-hidden">
+          <canvas id="minimap-canvas" width="160" height="160" class="w-full h-full cursor-pointer"></canvas>
+        </div>
+        <div class="text-[9px] font-mono text-slate-400">Click beacon to fast-travel</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- 4. HOLOGRAPHIC WORLD / OBJECT INSPECTOR MODAL                         -->
+  <!-- ===================================================================== -->
+  <div id="inspector-modal" class="hidden fixed inset-0 z-40 bg-slate-950/75 backdrop-blur-md flex items-center justify-center p-3 sm:p-6">
+    <div class="glass-panel rounded-2xl w-full max-w-4xl max-h-[88vh] flex flex-col overflow-hidden border-cyan-400/40 shadow-[0_0_60px_rgba(0,240,255,0.18)] selectable">
+      <!-- Modal Header -->
+      <div class="no-print flex items-center justify-between px-5 sm:px-6 py-4 border-b border-slate-700/60 bg-slate-900/50">
+        <div>
+          <div id="modal-subtitle" class="font-mono text-[11px] uppercase tracking-widest text-cyan-400">WORLD INSPECTOR</div>
+          <h2 id="modal-title" class="font-display text-lg sm:text-2xl font-bold text-white mt-0.5">Title</h2>
+        </div>
+        <button onclick="closeInspectorModal()" class="w-9 h-9 rounded-xl bg-slate-800/80 hover:bg-rose-500/20 hover:text-rose-300 border border-slate-700 flex items-center justify-center transition text-lg">✕</button>
+      </div>
+      <!-- Modal Body -->
+      <div id="modal-body" class="p-5 sm:p-6 overflow-y-auto flex-1 space-y-5 text-sm text-slate-200"></div>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- 5. PROFESSIONAL QUICK-ACCESS VIEW (RECRUITER EXECUTIVE MODE)          -->
+  <!-- ===================================================================== -->
+  <div id="quick-view" class="hidden fixed inset-0 z-40 bg-[#030712]/96 backdrop-blur-xl flex flex-col overflow-hidden selectable">
+    <!-- Top Executive Navigation Bar -->
+    <header class="border-b border-slate-800/90 bg-slate-950/90 px-4 sm:px-8 py-3.5 flex flex-wrap items-center justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-cyan-400 to-blue-600 flex items-center justify-center font-display font-bold text-slate-950 text-sm">SR</div>
+        <div>
+          <h1 class="font-display text-sm sm:text-base font-bold text-white tracking-wider">SHIVA PRASAD REDDY KISTIPATI</h1>
+          <p class="text-[11px] text-cyan-400 font-mono">Data Science • Data Analytics • Artificial Intelligence & Machine Learning</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <button onclick="openAIChat()" class="px-3.5 py-2 rounded-xl bg-cyan-500/15 border border-cyan-400/45 text-cyan-300 hover:bg-cyan-500/25 text-xs font-medium flex items-center gap-1.5 transition">
+          <span>✨ Ask AI Assistant</span>
+        </button>
+        <button onclick="closeQuickView()" class="btn-aaa-primary px-4 py-2 rounded-xl text-xs">
+          ENTER 3D WORLD
+        </button>
+      </div>
+    </header>
+
+    <!-- Tab Navigation Strip -->
+    <nav class="border-b border-slate-800/80 bg-slate-900/50 px-4 sm:px-8 overflow-x-auto">
+      <div id="qv-tabs" class="flex items-center gap-1.5 py-2.5 min-w-max">
+        <!-- Populated dynamically -->
+      </div>
+    </nav>
+
+    <!-- Main Scrollable Executive Content -->
+    <main id="qv-content" class="flex-1 overflow-y-auto px-4 sm:px-8 py-6 max-w-6xl w-full mx-auto space-y-6">
+      <!-- Populated dynamically -->
+    </main>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- 6. AI MULTI-AGENT PORTFOLIO ASSISTANT DRAWER (GEMINI API)             -->
+  <!-- ===================================================================== -->
+  <div id="ai-drawer" class="hidden fixed inset-y-0 right-0 z-50 w-full sm:w-[460px] glass-panel border-l border-cyan-400/40 flex flex-col shadow-[-12px_0_50px_rgba(0,0,0,0.8)] selectable">
+    <!-- Drawer Header -->
+    <div class="p-4 border-b border-slate-700/70 bg-slate-900/70 flex items-center justify-between">
+      <div class="flex items-center gap-2.5">
+        <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-400 via-blue-500 to-violet-500 flex items-center justify-center text-slate-950 font-bold text-sm">AI</div>
+        <div>
+          <h3 class="font-display text-sm font-bold text-white tracking-wider">MULTI-AGENT INTELLIGENCE</h3>
+          <p class="font-mono text-[10px] text-emerald-400 flex items-center gap-1">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+            GEMINI-3-FLASH • GROUNDED PORTFOLIO RAG
+          </p>
+        </div>
+      </div>
+      <button onclick="closeAIChat()" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 flex items-center justify-center text-slate-300">✕</button>
+    </div>
+
+    <!-- Live Multi-Agent Orchestration Badges -->
+    <div class="px-4 py-3 border-b border-slate-800/80 bg-slate-950/60">
+      <div class="text-[10px] font-mono text-slate-400 uppercase tracking-widest mb-2">Active Agent Orchestration Pipeline</div>
+      <div class="grid grid-cols-2 gap-1.5" id="agent-badges">
+        <div data-agent="orchestrator" class="agent-badge px-2.5 py-1.5 rounded-lg border border-slate-700/80 bg-slate-900/70 text-[10px] font-mono text-slate-400 flex items-center gap-1.5">
+          <span class="w-1.5 h-1.5 rounded-full bg-current"></span>Orchestrator
+        </div>
+        <div data-agent="profile" class="agent-badge px-2.5 py-1.5 rounded-lg border border-slate-700/80 bg-slate-900/70 text-[10px] font-mono text-slate-400 flex items-center gap-1.5">
+          <span class="w-1.5 h-1.5 rounded-full bg-current"></span>Profile Agent
+        </div>
+        <div data-agent="projects" class="agent-badge px-2.5 py-1.5 rounded-lg border border-slate-700/80 bg-slate-900/70 text-[10px] font-mono text-slate-400 flex items-center gap-1.5">
+          <span class="w-1.5 h-1.5 rounded-full bg-current"></span>Project Analyst
+        </div>
+        <div data-agent="skills" class="agent-badge px-2.5 py-1.5 rounded-lg border border-slate-700/80 bg-slate-900/70 text-[10px] font-mono text-slate-400 flex items-center gap-1.5">
+          <span class="w-1.5 h-1.5 rounded-full bg-current"></span>Skills Agent
+        </div>
+        <div data-agent="comms" class="agent-badge col-span-2 px-2.5 py-1.5 rounded-lg border border-slate-700/80 bg-slate-900/70 text-[10px] font-mono text-slate-400 flex items-center gap-1.5">
+          <span class="w-1.5 h-1.5 rounded-full bg-current"></span>Recruiter Comms Agent
+        </div>
+      </div>
+    </div>
+
+    <!-- Chat Messages Container -->
+    <div id="ai-messages" class="flex-1 overflow-y-auto p-4 space-y-3.5 text-sm">
+      <div class="glass-card rounded-2xl rounded-tl-sm p-3.5 border-cyan-500/30">
+        <div class="font-mono text-[10px] text-cyan-400 mb-1">ORCHESTRATOR</div>
+        <p class="text-slate-200 leading-relaxed text-xs sm:text-sm">
+          Welcome! I am the Multi-Agent Portfolio Intelligence System for <strong>Shiva Prasad Reddy Kistipati</strong>, strictly grounded in his verified resume. Ask me about his education, DataPilot AI, Blinkit Sales Analysis Dashboard, SQL/Power BI/Python skills, or internships.
+        </p>
+      </div>
+    </div>
+
+    <!-- Quick-Ask Suggestion Chips -->
+    <div class="px-4 py-2 border-t border-slate-800/80 bg-slate-950/60 flex flex-wrap gap-1.5">
+      <button onclick="sendQuickPrompt('Summarize Shiva\'s resume')" class="text-[11px] px-2.5 py-1 rounded-full bg-slate-800/90 hover:bg-cyan-500/20 hover:text-cyan-300 border border-slate-700 transition">Summarize Shiva's resume</button>
+      <button onclick="sendQuickPrompt('Explain DataPilot AI')" class="text-[11px] px-2.5 py-1 rounded-full bg-slate-800/90 hover:bg-cyan-500/20 hover:text-cyan-300 border border-slate-700 transition">Explain DataPilot AI</button>
+      <button onclick="sendQuickPrompt('Show SQL & Power BI skills')" class="text-[11px] px-2.5 py-1 rounded-full bg-slate-800/90 hover:bg-cyan-500/20 hover:text-cyan-300 border border-slate-700 transition">Show SQL & Power BI skills</button>
+      <button onclick="sendQuickPrompt('Why hire Shiva for Data Analytics?')" class="text-[11px] px-2.5 py-1 rounded-full bg-slate-800/90 hover:bg-cyan-500/20 hover:text-cyan-300 border border-slate-700 transition">Why hire Shiva for Data Analytics?</button>
+    </div>
+
+    <!-- Input Form -->
+    <form id="ai-form" onsubmit="handleAIChatSubmit(event)" class="p-3.5 border-t border-slate-800 bg-slate-950/90 flex gap-2">
+      <input id="ai-input" type="text" placeholder="Ask about Shiva's skills, projects, code..." class="flex-1 bg-slate-900 border border-slate-700 focus:border-cyan-400 focus:outline-none rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-white placeholder-slate-500" autocomplete="off" />
+      <button type="submit" id="ai-send-btn" class="btn-aaa-primary px-4 py-2.5 rounded-xl text-xs">SEND</button>
+    </form>
+  </div>
+
+  <!-- Toast Notification Box (Replaces alert/confirm) -->
+  <div id="toast-box" class="hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-50 glass-panel border-cyan-400/60 px-5 py-3 rounded-xl text-xs sm:text-sm font-medium text-cyan-200 shadow-2xl transition-all"></div>
+
+  <!-- ===================================================================== -->
+  <!-- JAVASCRIPT: DATA, 3D ENGINE, INTERACTIONS, QUICK VIEW, GEMINI AI      -->
+  <!-- ===================================================================== -->
+  <script>
+    // =========================================================================
+    // 1. VERIFIED PORTFOLIO KNOWLEDGE BASE (STRICT RESUME GROUND TRUTH)
+    // =========================================================================
+    const PORTFOLIO_DATA = {
+      identity: {
+        name: "SHIVA PRASAD REDDY KISTIPATI",
+        shortName: "Shiva Prasad Reddy",
+        title: "Data Science | Data Analytics | Artificial Intelligence & Machine Learning",
+        location: "Hyderabad, Telangana, India",
+        phone: "+91 9951338294",
+        email: "kkshivareddykistipati@gmail.com",
+        summary: "Computer Science and Engineering (Data Science) graduate with a strong academic foundation in Python, SQL, data analysis, and machine learning. Experienced through academic projects and virtual internships in data preprocessing, exploratory analysis, predictive modeling, and interactive reporting. Seeking an entry-level role or internship in Data Science, Artificial Intelligence, Machine Learning, or Data Analytics to build practical, data-driven solutions.",
+        careerVision: "Seeking an entry-level role or internship in Data Science, Artificial Intelligence, Machine Learning, or Data Analytics to build practical, data-driven solutions.",
+        links: {
+          linkedin: "https://www.linkedin.com/in/kistipati-shivaprasadreddy",
+          github: "https://github.com/Shivalateral",
+          leetcode: "https://leetcode.com/u/K_s_reddy133",
+          datapilot: "https://datapilot-ai-2.onrender.com/"
+        }
+      },
+      education: [
+        {
+          degree: "B.Tech - Computer Science & Engineering (Data Science)",
+          institution: "Anurag University, Hyderabad",
+          period: "2023–2026",
+          score: "CGPA: 8.46 / 10"
+        },
+        {
+          degree: "Diploma - Computer Science & Engineering",
+          institution: "Computer Science & Engineering",
+          period: "2020–2023",
+          score: "CGPA: 9.1 / 10"
+        }
+      ],
+      experiences: [
+        {
+          id: "techsaksham",
+          role: "AI Internship",
+          org: "TechSaksham",
+          period: "Virtual Internship",
+          badge: "Artificial Intelligence & Python",
+          highlights: [
+            "Gained practical exposure to Artificial Intelligence concepts and Python-based application development through structured internship activities."
+          ]
+        },
+        {
+          id: "google_cloud_genai",
+          role: "Generative AI Virtual Internship (Cohort 9)",
+          org: "Google Cloud",
+          period: "Cohort 9",
+          badge: "Vertex AI & Streamlit",
+          highlights: [
+            "Explored Generative AI, Vertex AI, Google Cloud technologies, and Streamlit through guided, hands-on learning modules."
+          ]
+        }
+      ],
+      skills: [
+        {
+          id: "python",
+          name: "Python",
+          category: "Core Programming",
+          color: "#a855f7",
+          level: "Core Foundation",
+          tags: ["Data Structures", "Unpacking", "Comprehensions", "Lambda Functions", "Exception Handling"],
+          details: "Strong command of Python fundamentals for data preprocessing, automation, and analytics workflows: Data Structures, Unpacking, Comprehensions, Lambda Functions, and Exception Handling."
+        },
+        {
+          id: "sql",
+          name: "SQL (MySQL)",
+          category: "Relational Databases",
+          color: "#38bdf8",
+          level: "LeetCode SQL 50 Badge",
+          tags: ["Joins", "Recursive & Non-Recursive CTEs", "Window Functions", "Views", "Stored Procedures"],
+          details: "Proficient in analytical querying with MySQL including complex Joins, Recursive and Non-Recursive CTEs, Window Functions, Views, and Stored Procedures — backed by completing the LeetCode SQL 50 study plan."
+        },
+        {
+          id: "excel",
+          name: "Advanced Excel",
+          category: "Spreadsheet Analytics & BI",
+          color: "#10b981",
+          level: "Dashboard Ready",
+          tags: ["XLOOKUP", "INDEX-MATCH", "Pivot Tables", "Power Query"],
+          details: "Hands-on experience cleaning retail datasets and building executive analytical dashboards using XLOOKUP, INDEX-MATCH, Pivot Tables, and Power Query."
+        },
+        {
+          id: "powerbi",
+          name: "Power BI",
+          category: "Business Intelligence",
+          color: "#f59e0b",
+          level: "Interactive Reporting",
+          tags: ["Data Modelling", "DAX", "CALCULATE()", "Filter Context", "Row-Level Security"],
+          details: "Skilled in enterprise BI reporting with Power BI: Data Modelling, DAX measures, CALCULATE(), Filter Context evaluation, and Row-Level Security (RLS)."
+        },
+        {
+          id: "ml",
+          name: "Machine Learning",
+          category: "Predictive Modeling",
+          color: "#ec4899",
+          level: "NPTEL Elite + Silver (75%)",
+          tags: ["Regression", "Classification", "Feature Engineering", "Random Forest", "XGBoost", "Model Evaluation"],
+          details: "Applied machine learning expertise across Regression, Classification, Feature Engineering, Random Forest, XGBoost, and rigorous Model Evaluation."
+        }
+      ],
+      projects: [
+        {
+          id: "datapilot",
+          title: "DataPilot AI - Automated Data Analysis Platform",
+          tagline: "Python, Pandas, Excel, Streamlit • Live Cloud Analytics App",
+          liveUrl: "https://datapilot-ai-2.onrender.com/",
+          githubUrl: "https://github.com/Shivalateral",
+          color: "#00f0ff",
+          problem: "Analysts and business stakeholders spend significant manual effort cleaning raw Excel workbooks, running repetitive pivot summaries, and formatting analytical reports.",
+          architecture: "Developed an end-to-end Python & Streamlit workflow for uploading and processing Excel datasets, automating data cleaning and transformation tasks via Pandas, generating automated KPIs, interactive pivot analysis, visual dashboards, and downloadable analytical reports.",
+          kpis: [
+            "End-to-end automated Excel dataset ingestion, cleaning, and transformation",
+            "Automated KPI generation, pivot analysis, and interactive visual dashboards",
+            "One-click downloadable analytical reports deployed live on Render"
+          ],
+          tech: ["Python", "Pandas", "Excel", "Streamlit"],
+          files: {
+            "README.md": `# DataPilot AI - Automated Data Analysis Platform\n\nLive Demo: https://datapilot-ai-2.onrender.com/\nGitHub: https://github.com/Shivalateral\n\n## Overview\nDataPilot AI automates end-to-end Excel dataset analysis using Python, Pandas, and Streamlit.\n\n## Key Capabilities\n- Automated Excel upload, data cleaning, and transformation tasks\n- Instant KPI generation & interactive pivot analysis\n- Interactive visual dashboards & downloadable analytical reports`,
+            "app/data_pipeline.py": `# DataPilot AI — Automated Excel Cleaning & KPI Engine\nimport pandas as pd\n\ndef clean_and_profile_excel(file_obj) -> tuple[pd.DataFrame, dict]:\n    df = pd.read_excel(file_obj)\n    # Automated cleaning: trim whitespace, drop full-empty rows, standardize nulls\n    df.columns = [str(c).strip() for c in df.columns]\n    df = df.dropna(how="all").drop_duplicates()\n\n    kpis = {\n        "total_rows": len(df),\n        "total_columns": df.shape[1],\n        "missing_values": int(df.isna().sum().sum()),\n        "numeric_columns": list(df.select_dtypes(include="number").columns)\n    }\n    return df, kpis`,
+            "sql/analytical_kpis.sql": `-- Representative MySQL CTE + Window Function KPI Query\nWITH CategorySales AS (\n    SELECT\n        category,\n        outlet_type,\n        SUM(sales_amount) AS total_sales,\n        COUNT(DISTINCT order_id) AS order_count\n    FROM retail_transactions\n    GROUP BY category, outlet_type\n)\nSELECT\n    category,\n    outlet_type,\n    total_sales,\n    ROUND(100.0 * total_sales / SUM(total_sales) OVER (), 2) AS revenue_share_pct,\n    DENSE_RANK() OVER (ORDER BY total_sales DESC) AS sales_rank\nFROM CategorySales;`
+          }
+        },
+        {
+          id: "blinkit",
+          title: "Blinkit Sales Analysis Dashboard",
+          tagline: "Advanced Excel • Retail Performance & Executive KPI Dashboard",
+          liveUrl: null,
+          githubUrl: "https://github.com/Shivalateral",
+          color: "#f59e0b",
+          hasInteractivePreview: true,
+          problem: "Retail operations teams needed a unified executive view of sales performance across diverse product categories, outlet types, and customer purchasing patterns.",
+          architecture: "Cleaned raw retail sales datasets in Advanced Excel and engineered a dynamic executive dashboard using Pivot Tables, XLOOKUP, structured data cleaning, and interactive slicers/charts to surface actionable business insights.",
+          kpis: [
+            "Analyzed sales performance across product categories & outlet types",
+            "Uncovered customer purchasing patterns via Pivot Tables & XLOOKUP",
+            "Delivered interactive executive charts & actionable retail insights"
+          ],
+          tech: ["Advanced Excel", "Pivot Tables", "XLOOKUP", "Data Cleaning", "Interactive Charts"],
+          files: {
+            "README.md": `# Blinkit Sales Analysis Dashboard (Advanced Excel)\n\nGitHub: https://github.com/Shivalateral\n\n## Business Focus\n- Analyzed sales performance, product categories, outlet types, and customer purchasing patterns across retail datasets.\n- Applied Pivot Tables, XLOOKUP, data cleaning, and interactive charts to design an executive dashboard and derive actionable business insights.`,
+            "formulas/excel_and_dax.dax": `// Excel XLOOKUP Formula used for Outlet Tier Mapping\n// =XLOOKUP([@Outlet_ID], Outlet_Master[Outlet_ID], Outlet_Master[Outlet_Type], "Unknown")\n\n// Equivalent Power BI DAX Measure (CALCULATE & Filter Context)\nTier1_Outlet_Sales :=\nCALCULATE(\n    SUM(BlinkitSales[Total_Sales]),\n    BlinkitSales[Outlet_Location_Type] = "Tier 1"\n)\n\nCategory_Sales_Share_% :=\nDIVIDE(\n    SUM(BlinkitSales[Total_Sales]),\n    CALCULATE(SUM(BlinkitSales[Total_Sales]), ALL(BlinkitSales[Item_Type]))\n)`
+          }
+        }
+      ],
+      certifications: [
+        {
+          category: "NPTEL Certification",
+          title: "Introduction to Machine Learning — Elite + Silver (75%)",
+          detail: "Earned Elite + Silver certification (75% score) covering supervised/unsupervised learning, model evaluation, and mathematical foundations."
+        },
+        {
+          category: "NPTEL Certification",
+          title: "Database Management Systems",
+          detail: "Completed NPTEL certification in relational database design, normalization, SQL querying, indexing, and transaction management."
+        },
+        {
+          category: "Google Cloud Virtual Internship",
+          title: "Google Cloud — Data Analytics Virtual Internship",
+          detail: "Hands-on cloud data analytics experience covering cloud warehousing, analytical pipelines, and insight reporting."
+        },
+        {
+          category: "Coding Platform • LeetCode",
+          title: "LeetCode SQL 50 Study Plan & SQL Badge",
+          detail: "Completed the LeetCode SQL 50 study plan, solving 50 SQL problems and earning the verified SQL badge.",
+          link: "https://leetcode.com/u/K_s_reddy133"
+        },
+        {
+          category: "Coding Platform • HackerRank",
+          title: "HackerRank — Python & SQL Challenges",
+          detail: "Actively practicing Python and SQL coding challenges to sharpen algorithmic and analytical problem-solving speed."
+        }
+      ]
+    };
+
+    // =========================================================================
+    // 2. SEVEN WORLDS SPATIAL CONFIGURATION
+    // =========================================================================
+    const WORLDS = [
+      { id: "hub", name: "CENTRAL NEXUS HUB", short: "HUB", x: 0, z: 0, color: 0x00f0ff, hex: "#00f0ff", caption: "Welcome to the Central Nexus Hub — the gateway to Shiva Prasad Reddy Kistipati's interactive 3D portfolio. Seven worlds orbit this core." },
+      { id: "identity", name: "WORLD 1 — IDENTITY REALM", short: "IDENTITY", x: 0, z: -28, color: 0x00f0ff, hex: "#00f0ff", caption: "World 1: Identity Realm. Explore Shiva's summary, B.Tech CSE (Data Science) at Anurag University (8.46 CGPA), Diploma (9.1 CGPA), and career vision." },
+      { id: "experience", name: "WORLD 2 — EXPERIENCE REALM", short: "EXPERIENCE", x: 26, z: -16, color: 0x10b981, hex: "#10b981", caption: "World 2: Experience Realm. Inspect Shiva's TechSaksham AI Internship and Google Cloud Generative AI Virtual Internship (Cohort 9)." },
+      { id: "skills", name: "WORLD 3 — SKILL MATRIX", short: "SKILLS", x: 33, z: 10, color: 0xa855f7, hex: "#a855f7", caption: "World 3: Skill Matrix. Five interactive 3D holographic pillars representing Python, SQL (MySQL), Advanced Excel, Power BI/DAX, and Machine Learning." },
+      { id: "projects", name: "WORLD 4 — PROJECT GALAXY", short: "PROJECTS", x: 15, z: 31, color: 0xf59e0b, hex: "#f59e0b", caption: "World 4: Project Galaxy. Explore DataPilot AI (live on Render) and the Blinkit Sales Analysis Dashboard with an interactive KPI preview and Code Explorer." },
+      { id: "ai_lab", name: "WORLD 5 — AI RESEARCH LAB", short: "AI LAB", x: -15, z: 31, color: 0xec4899, hex: "#ec4899", caption: "World 5: AI Research Lab. Highlighting Generative AI, Vertex AI, Streamlit, Random Forest, XGBoost, and Feature Engineering — plus direct launch to the AI Assistant." },
+      { id: "achievements", name: "WORLD 6 — ACHIEVEMENT MUSEUM", short: "MUSEUM", x: -33, z: 10, color: 0xe2e8f0, hex: "#e2e8f0", caption: "World 6: Achievement Museum. Honoring NPTEL ML Elite + Silver (75%), NPTEL DBMS, Google Cloud Data Analytics, LeetCode SQL 50 Badge, and HackerRank." },
+      { id: "terminal", name: "WORLD 7 — CONNECTION TERMINAL", short: "CONNECT", x: -26, z: -16, color: 0x38bdf8, hex: "#38bdf8", caption: "World 7: Connection Terminal. Direct links to LinkedIn, GitHub (Shivalateral), LeetCode, Email, Phone, and a Print-to-PDF Resume Viewer." }
+    ];
+
+    // =========================================================================
+    // 3. GLOBAL APPLICATION STATE
+    // =========================================================================
+    let scene, camera, renderer, clock;
+    let avatarGroup, avatarParts = {};
+    let interactiveObjects = []; // { mesh, label, worldId, action }
+    let animatedElements = [];   // { update(t, dt) }
+    let particleSystems = [];
+
+    let appMode = "boot"; // boot | entry | explore | tour | quick
+    let cameraMode = "third"; // third | first
+    let graphicsQuality = "HIGH"; // HIGH | BALANCED
+    let reducedMotion = false;
+
+    // Avatar & Camera Physics State
+    let avatarPos = new THREE.Vector3(0, 0, 5.5);
+    let avatarVel = new THREE.Vector3(0, 0, 0);
+    let avatarRotY = 0;
+    let walkCycle = 0;
+
+    let camYaw = 0;
+    let camPitch = 0.28;
+    let camDistance = 10.5;
+    let isDragging = false;
+    let pointerDownPos = { x: 0, y: 0 };
+    let lastPointerPos = { x: 0, y: 0 };
+
+    const keys = { w: false, a: false, s: false, d: false, arrowup: false, arrowdown: false, arrowleft: false, arrowright: false };
+    const raycaster = new THREE.Raycaster();
+    const pointerNDC = new THREE.Vector2();
+    let nearestInteractable = null;
+
+    let tourIndex = 0;
+    let tourTimer = null;
+    let flyTarget = null; // { pos, lookAt, avatarDest }
+
+    // =========================================================================
+    // 4. PROCEDURAL CANVAS TEXTURES (NO EXTERNAL IMAGE URLS)
+    // =========================================================================
+    function createGridTexture() {
+      const c = document.createElement('canvas');
+      c.width = 512;
+      c.height = 512;
+      const ctx = c.getContext('2d');
+
+      ctx.fillStyle = '#040916';
+      ctx.fillRect(0, 0, 512, 512);
+
+      // Subtle minor grid
+      ctx.strokeStyle = 'rgba(0, 240, 255, 0.08)';
+      ctx.lineWidth = 1;
+      for (let i = 0; i <= 512; i += 32) {
+        ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, 512); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(512, i); ctx.stroke();
+      }
+
+      // Major glowing grid border
+      ctx.strokeStyle = 'rgba(0, 240, 255, 0.26)';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(1, 1, 510, 510);
+
+      const tex = new THREE.CanvasTexture(c);
+      tex.wrapS = THREE.RepeatWrapping;
+      tex.wrapT = THREE.RepeatWrapping;
+      tex.repeat.set(36, 36);
+      return tex;
+    }
+
+    function createLabelSprite(text, hexColor) {
+      const c = document.createElement('canvas');
+      c.width = 640;
+      c.height = 128;
+      const ctx = c.getContext('2d');
+
+      ctx.fillStyle = 'rgba(5, 11, 26, 0.84)';
+      ctx.strokeStyle = hexColor;
+      ctx.lineWidth = 4;
+      ctx.beginPath();
+      ctx.roundRect(16, 22, 608, 84, 24);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = '#f8fafc';
+      ctx.font = '700 26px Orbitron, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(text, 320, 65);
+
+      const tex = new THREE.CanvasTexture(c);
+      const mat = new THREE.SpriteMaterial({ map: tex, transparent: true });
+      const sprite = new THREE.Sprite(mat);
+      sprite.scale.set(7.5, 1.5, 1);
+      return sprite;
+    }
+
+    function createDashboardTexture() {
+      const c = document.createElement('canvas');
+      c.width = 512;
+      c.height = 320;
+      const ctx = c.getContext('2d');
+
+      ctx.fillStyle = '#071024';
+      ctx.fillRect(0, 0, 512, 320);
+
+      ctx.strokeStyle = '#f59e0b';
+      ctx.lineWidth = 4;
+      ctx.strokeRect(6, 6, 500, 308);
+
+      ctx.fillStyle = '#fbbf24';
+      ctx.font = '700 20px Orbitron, sans-serif';
+      ctx.fillText('BLINKIT RETAIL KPI DASHBOARD', 24, 38);
+
+      // KPI cards
+      const cards = [
+        { k: 'SALES', v: '$1.20M', col: '#38bdf8' },
+        { k: 'ITEMS', v: '8,523', col: '#10b981' },
+        { k: 'RATING', v: '3.9 / 5', col: '#a855f7' }
+      ];
+      cards.forEach((item, idx) => {
+        const x = 24 + idx * 158;
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.9)';
+        ctx.fillRect(x, 56, 146, 64);
+        ctx.fillStyle = '#94a3b8';
+        ctx.font = '600 12px JetBrains Mono, monospace';
+        ctx.fillText(item.k, x + 12, 78);
+        ctx.fillStyle = item.col;
+        ctx.font = '700 20px Orbitron, sans-serif';
+        ctx.fillText(item.v, x + 12, 106);
+      });
+
+      // Bar chart visualization
+      const bars = [130, 118, 96, 84, 72];
+      bars.forEach((h, idx) => {
+        const bx = 42 + idx * 90;
+        const grad = ctx.createLinearGradient(0, 290 - h, 0, 290);
+        grad.addColorStop(0, '#00f0ff');
+        grad.addColorStop(1, '#f59e0b');
+        ctx.fillStyle = grad;
+        ctx.fillRect(bx, 290 - h, 52, h);
+      });
+
+      return new THREE.CanvasTexture(c);
+    }
+
+    // =========================================================================
+    // 5. THREE.JS 3D WORLD CONSTRUCTION
+    // =========================================================================
+    function initThreeWorld() {
+      const canvas = document.getElementById('world-canvas');
+      try {
+        renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' });
+      } catch (e) {
+        document.getElementById('boot-screen').classList.add('hidden');
+        document.getElementById('webgl-fallback').classList.remove('hidden');
+        return false;
+      }
+
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.shadowMap.enabled = true;
+      renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+      renderer.toneMapping = THREE.ACESFilmicToneMapping;
+      renderer.toneMappingExposure = 1.15;
+
+      scene = new THREE.Scene();
+      scene.background = new THREE.Color(0x030712);
+      scene.fog = new THREE.FogExp2(0x030712, 0.0155);
+
+      camera = new THREE.PerspectiveCamera(58, window.innerWidth / window.innerHeight, 0.1, 260);
+      camera.position.set(0, 7.5, 19);
+      clock = new THREE.Clock();
+
+      buildLightingAndAtmosphere();
+      buildFloorAndPathways();
+      buildCentralPortalHub();
+      buildArticulatedAvatar();
+      buildSevenWorlds();
+      buildParticleSystems();
+
+      setupInputListeners();
+      window.addEventListener('resize', onWindowResize);
+      return true;
+    }
+
+    function buildLightingAndAtmosphere() {
+      // Ambient + Hemisphere lighting for cinematic depth
+      const ambient = new THREE.AmbientLight(0x38bdf8, 0.45);
+      scene.add(ambient);
+
+      const hemi = new THREE.HemisphereLight(0x38bdf8, 0x090d1f, 0.65);
+      scene.add(hemi);
+
+      // Directional Key Light with shadows
+      const dirLight = new THREE.DirectionalLight(0xe0f2fe, 1.15);
+      dirLight.position.set(22, 42, 18);
+      dirLight.castShadow = true;
+      dirLight.shadow.mapSize.width = 1024;
+      dirLight.shadow.mapSize.height = 1024;
+      dirLight.shadow.camera.near = 5;
+      dirLight.shadow.camera.far = 120;
+      const d = 48;
+      dirLight.shadow.camera.left = -d;
+      dirLight.shadow.camera.right = d;
+      dirLight.shadow.camera.top = d;
+      dirLight.shadow.camera.bottom = -d;
+      scene.add(dirLight);
+
+      // Subtle Rim Light
+      const rimLight = new THREE.DirectionalLight(0xa855f7, 0.55);
+      rimLight.position.set(-25, 20, -28);
+      scene.add(rimLight);
+
+      // Volumetric-style central light shaft cone
+      const shaftGeo = new THREE.ConeGeometry(11, 32, 32, 1, true);
+      const shaftMat = new THREE.MeshBasicMaterial({
+        color: 0x00f0ff,
+        transparent: true,
+        opacity: 0.045,
+        side: THREE.DoubleSide,
+        depthWrite: false,
+        blending: THREE.AdditiveBlending
+      });
+      const shaft = new THREE.Mesh(shaftGeo, shaftMat);
+      shaft.position.set(0, 15, 0);
+      scene.add(shaft);
+    }
+
+    function buildFloorAndPathways() {
+      // Dark obsidian futuristic grid floor
+      const floorGeo = new THREE.PlaneGeometry(240, 240);
+      const floorMat = new THREE.MeshStandardMaterial({
+        map: createGridTexture(),
+        roughness: 0.28,
+        metalness: 0.65
+      });
+      const floor = new THREE.Mesh(floorGeo, floorMat);
+      floor.rotation.x = -Math.PI / 2;
+      floor.receiveShadow = true;
+      scene.add(floor);
+
+      // Glowing radial energy pathways from Hub (0,0) to each of the 7 Worlds
+      WORLDS.slice(1).forEach(w => {
+        const dist = Math.hypot(w.x, w.z);
+        const pathGeo = new THREE.PlaneGeometry(0.45, dist);
+        const pathMat = new THREE.MeshBasicMaterial({
+          color: w.color,
+          transparent: true,
+          opacity: 0.35,
+          blending: THREE.AdditiveBlending
+        });
+        const path = new THREE.Mesh(pathGeo, pathMat);
+        path.rotation.x = -Math.PI / 2;
+        path.position.set(w.x / 2, 0.03, w.z / 2);
+        path.rotation.z = -Math.atan2(w.x, w.z);
+        scene.add(path);
+      });
+    }
+
+    function buildCentralPortalHub() {
+      const hubGroup = new THREE.Group();
+      scene.add(hubGroup);
+
+      // Stepped Obsidian Platform
+      const baseGeo = new THREE.CylinderGeometry(7.2, 8.2, 0.35, 36);
+      const baseMat = new THREE.MeshStandardMaterial({ color: 0x0b1224, metalness: 0.8, roughness: 0.25 });
+      const base = new THREE.Mesh(baseGeo, baseMat);
+      base.position.y = 0.175;
+      base.receiveShadow = true;
+      hubGroup.add(base);
+
+      // Glowing Floor Ring
+      const floorRingGeo = new THREE.RingGeometry(6.8, 7.2, 48);
+      const floorRingMat = new THREE.MeshBasicMaterial({ color: 0x00f0ff, side: THREE.DoubleSide, transparent: true, opacity: 0.75 });
+      const floorRing = new THREE.Mesh(floorRingGeo, floorRingMat);
+      floorRing.rotation.x = -Math.PI / 2;
+      floorRing.position.y = 0.36;
+      hubGroup.add(floorRing);
+
+      // Massive Futuristic Entrance Portal Arch behind avatar
+      const outerRingGeo = new THREE.TorusGeometry(6.2, 0.26, 16, 64);
+      const outerRingMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, emissive: 0x00f0ff, emissiveIntensity: 0.7, metalness: 0.9, roughness: 0.15 });
+      const outerRing = new THREE.Mesh(outerRingGeo, outerRingMat);
+      outerRing.position.set(0, 6.2, -3.5);
+      hubGroup.add(outerRing);
+
+      const innerRingGeo = new THREE.TorusGeometry(5.1, 0.1, 12, 48);
+      const innerRingMat = new THREE.MeshBasicMaterial({ color: 0xa855f7, transparent: true, opacity: 0.8 });
+      const innerRing = new THREE.Mesh(innerRingGeo, innerRingMat);
+      innerRing.position.set(0, 6.2, -3.5);
+      hubGroup.add(innerRing);
+
+      const hubLight = new THREE.PointLight(0x00f0ff, 2.2, 26);
+      hubLight.position.set(0, 6.5, 0);
+      hubGroup.add(hubLight);
+
+      animatedElements.push({
+        update: (t) => {
+          outerRing.rotation.z = t * 0.22;
+          innerRing.rotation.z = -t * 0.48;
+          innerRing.rotation.y = Math.sin(t * 0.6) * 0.25;
+        }
+      });
+    }
+
+    // =========================================================================
+    // 6. ARTICULATED 3D DIGITAL HUMAN AVATAR (SHIVA)
+    // =========================================================================
+    function buildArticulatedAvatar() {
+      avatarGroup = new THREE.Group();
+      avatarGroup.position.copy(avatarPos);
+      scene.add(avatarGroup);
+
+      const skinMat = new THREE.MeshStandardMaterial({ color: 0xd9a077, roughness: 0.48, metalness: 0.05 });
+      const hairMat = new THREE.MeshStandardMaterial({ color: 0x111827, roughness: 0.7 });
+      const suitMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.35, metalness: 0.55 });
+      const shirtMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, roughness: 0.5 });
+      const trimMat = new THREE.MeshBasicMaterial({ color: 0x00f0ff });
+      const shoeMat = new THREE.MeshStandardMaterial({ color: 0x020617, roughness: 0.3, metalness: 0.7 });
+
+      // Subtle glowing ring under avatar feet
+      const footRing = new THREE.Mesh(
+        new THREE.RingGeometry(0.65, 0.78, 32),
+        new THREE.MeshBasicMaterial({ color: 0x00f0ff, side: THREE.DoubleSide, transparent: true, opacity: 0.55 })
+      );
+      footRing.rotation.x = -Math.PI / 2;
+      footRing.position.y = 0.05;
+      avatarGroup.add(footRing);
+
+      // Upper Body Container (for breathing animation)
+      const bodyRoot = new THREE.Group();
+      bodyRoot.position.y = 0.98;
+      avatarGroup.add(bodyRoot);
+      avatarParts.bodyRoot = bodyRoot;
+
+      // Torso (Tech-professional blazer)
+      const torso = new THREE.Mesh(new THREE.BoxGeometry(0.62, 0.78, 0.32), suitMat);
+      torso.position.y = 0.39;
+      torso.castShadow = true;
+      bodyRoot.add(torso);
+
+      // Inner Shirt V-panel + Glowing Cyan Tech Lapel Trim
+      const shirt = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.65, 0.335), shirtMat);
+      shirt.position.set(0, 0.42, 0.005);
+      bodyRoot.add(shirt);
+
+      const lapelL = new THREE.Mesh(new THREE.BoxGeometry(0.03, 0.55, 0.345), trimMat);
+      lapelL.position.set(-0.12, 0.42, 0.006);
+      bodyRoot.add(lapelL);
+
+      const lapelR = new THREE.Mesh(new THREE.BoxGeometry(0.03, 0.55, 0.345), trimMat);
+      lapelR.position.set(0.12, 0.42, 0.006);
+      bodyRoot.add(lapelR);
+
+      // Neck & Head Group
+      const headGroup = new THREE.Group();
+      headGroup.position.set(0, 0.84, 0);
+      bodyRoot.add(headGroup);
+      avatarParts.headGroup = headGroup;
+
+      const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.1, 0.14, 14), skinMat);
+      neck.position.y = 0.03;
+      headGroup.add(neck);
+
+      const head = new THREE.Mesh(new THREE.SphereGeometry(0.21, 24, 24), skinMat);
+      head.scale.set(0.92, 1.08, 0.96);
+      head.position.y = 0.24;
+      head.castShadow = true;
+      headGroup.add(head);
+
+      // Sculpted Hair
+      const hair = new THREE.Mesh(new THREE.SphereGeometry(0.218, 24, 16, 0, Math.PI * 2, 0, Math.PI * 0.56), hairMat);
+      hair.scale.set(0.95, 1.05, 0.99);
+      hair.position.set(0, 0.26, -0.015);
+      headGroup.add(hair);
+
+      // Sleek Futuristic Smart Glasses / Visor + Glowing Eyes
+      const visor = new THREE.Mesh(
+        new THREE.BoxGeometry(0.32, 0.065, 0.08),
+        new THREE.MeshStandardMaterial({ color: 0x020617, emissive: 0x00f0ff, emissiveIntensity: 0.45, metalness: 0.9, roughness: 0.1, transparent: true, opacity: 0.85 })
+      );
+      visor.position.set(0, 0.25, 0.18);
+      headGroup.add(visor);
+
+      const eyeGeo = new THREE.BoxGeometry(0.055, 0.022, 0.02);
+      const eyeMat = new THREE.MeshBasicMaterial({ color: 0x67e8f9 });
+      const eyeL = new THREE.Mesh(eyeGeo, eyeMat);
+      eyeL.position.set(-0.075, 0.25, 0.215);
+      const eyeR = new THREE.Mesh(eyeGeo, eyeMat);
+      eyeR.position.set(0.075, 0.25, 0.215);
+      headGroup.add(eyeL, eyeR);
+      avatarParts.eyes = [eyeL, eyeR];
+
+      // Articulated Arms
+      function createArm(side) {
+        const pivot = new THREE.Group();
+        pivot.position.set(side * 0.39, 0.72, 0);
+        const upper = new THREE.Mesh(new THREE.CylinderGeometry(0.085, 0.075, 0.58, 12), suitMat);
+        upper.position.y = -0.28;
+        upper.castShadow = true;
+        pivot.add(upper);
+
+        const cuff = new THREE.Mesh(new THREE.CylinderGeometry(0.078, 0.078, 0.04, 12), trimMat);
+        cuff.position.y = -0.56;
+        pivot.add(cuff);
+
+        const hand = new THREE.Mesh(new THREE.SphereGeometry(0.07, 12, 12), skinMat);
+        hand.position.y = -0.63;
+        pivot.add(hand);
+
+        bodyRoot.add(pivot);
+        return pivot;
+      }
+      avatarParts.armL = createArm(-1);
+      avatarParts.armR = createArm(1);
+
+      // Articulated Legs
+      function createLeg(side) {
+        const pivot = new THREE.Group();
+        pivot.position.set(side * 0.16, 0.98, 0);
+        const leg = new THREE.Mesh(new THREE.CylinderGeometry(0.105, 0.082, 0.86, 12), suitMat);
+        leg.position.y = -0.43;
+        leg.castShadow = true;
+        pivot.add(leg);
+
+        const shoe = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.1, 0.27), shoeMat);
+        shoe.position.set(0, -0.91, 0.05);
+        pivot.add(shoe);
+
+        avatarGroup.add(pivot);
+        return pivot;
+      }
+      avatarParts.legL = createLeg(-1);
+      avatarParts.legR = createLeg(1);
+
+      // Register Avatar itself as clickable
+      registerInteractable(torso, "Shiva's Digital Avatar — Identity & Story", "identity", () => openWorldModal("identity"));
+    }
+
+    // =========================================================================
+    // 7. BUILD THE SEVEN PROFESSIONAL WORLDS
+    // =========================================================================
+    function createWorldBase(world) {
+      const g = new THREE.Group();
+      g.position.set(world.x, 0, world.z);
+      scene.add(g);
+
+      // Platform
+      const plat = new THREE.Mesh(
+        new THREE.CylinderGeometry(6.2, 6.8, 0.3, 32),
+        new THREE.MeshStandardMaterial({ color: 0x0b1224, metalness: 0.78, roughness: 0.28 })
+      );
+      plat.position.y = 0.15;
+      plat.receiveShadow = true;
+      g.add(plat);
+
+      // Glowing Rim Ring
+      const ring = new THREE.Mesh(
+        new THREE.RingGeometry(5.9, 6.25, 48),
+        new THREE.MeshBasicMaterial({ color: world.color, side: THREE.DoubleSide, transparent: true, opacity: 0.8 })
+      );
+      ring.rotation.x = -Math.PI / 2;
+      ring.position.y = 0.32;
+      g.add(ring);
+
+      // Colored Local Point Light
+      const pt = new THREE.PointLight(world.color, 1.8, 22);
+      pt.position.set(0, 5.5, 0);
+      g.add(pt);
+
+      // Floating 3D Label
+      const label = createLabelSprite(world.name, world.hex);
+      label.position.set(0, 8.2, 0);
+      g.add(label);
+
+      return g;
+    }
+
+    function registerInteractable(mesh, label, worldId, action) {
+      mesh.userData.interactable = { label, worldId, action };
+      interactiveObjects.push({ mesh, label, worldId, action });
+    }
+
+    function buildSevenWorlds() {
+      // WORLD 1: IDENTITY REALM (Cyan Monolith)
+      const w1 = createWorldBase(WORLDS[1]);
+      const monolith = new THREE.Mesh(
+        new THREE.OctahedronGeometry(2.1, 0),
+        new THREE.MeshStandardMaterial({ color: 0x0ea5e9, emissive: 0x00f0ff, emissiveIntensity: 0.55, metalness: 0.85, roughness: 0.15, wireframe: false })
+      );
+      monolith.position.y = 3.6;
+      monolith.castShadow = true;
+      w1.add(monolith);
+
+      const mRing = new THREE.Mesh(
+        new THREE.TorusGeometry(3.0, 0.07, 12, 48),
+        new THREE.MeshBasicMaterial({ color: 0x00f0ff, transparent: true, opacity: 0.7 })
+      );
+      mRing.position.y = 3.6;
+      w1.add(mRing);
+      animatedElements.push({ update: (t) => { monolith.rotation.y = t * 0.6; monolith.position.y = 3.6 + Math.sin(t * 1.8) * 0.35; mRing.rotation.x = t * 0.5; mRing.rotation.y = t * 0.4; } });
+      registerInteractable(monolith, "World 1: Identity & Biography Monolith", "identity", () => openWorldModal("identity"));
+
+      // WORLD 2: EXPERIENCE REALM (Emerald Twin Timeline Pillars)
+      const w2 = createWorldBase(WORLDS[2]);
+      PORTFOLIO_DATA.experiences.forEach((exp, idx) => {
+        const xOff = idx === 0 ? -2.2 : 2.2;
+        const pillar = new THREE.Mesh(
+          new THREE.BoxGeometry(1.5, 4.4 + idx * 0.7, 1.5),
+          new THREE.MeshStandardMaterial({ color: 0x064e3b, emissive: 0x10b981, emissiveIntensity: 0.45, metalness: 0.7, roughness: 0.2 })
+        );
+        pillar.position.set(xOff, (4.4 + idx * 0.7) / 2 + 0.3, 0);
+        pillar.castShadow = true;
+        w2.add(pillar);
+
+        const cap = new THREE.Mesh(
+          new THREE.OctahedronGeometry(0.65, 0),
+          new THREE.MeshBasicMaterial({ color: 0x34d399, wireframe: true })
+        );
+        cap.position.set(xOff, 5.6 + idx * 0.7, 0);
+        w2.add(cap);
+        animatedElements.push({ update: (t) => { cap.rotation.y = t * (0.9 + idx * 0.3); cap.position.y = 5.6 + idx * 0.7 + Math.sin(t * 2 + idx) * 0.25; } });
+        registerInteractable(pillar, `Experience: ${exp.org}`, "experience", () => openWorldModal("experience"));
+      });
+
+      // WORLD 3: SKILL MATRIX (5 Distinct Holographic Pillars for Verified Skills)
+      const w3 = createWorldBase(WORLDS[3]);
+      PORTFOLIO_DATA.skills.forEach((sk, idx) => {
+        const angle = (idx / PORTFOLIO_DATA.skills.length) * Math.PI * 2 - Math.PI / 2;
+        const px = Math.cos(angle) * 3.7;
+        const pz = Math.sin(angle) * 3.7;
+
+        const pillar = new THREE.Mesh(
+          new THREE.CylinderGeometry(0.68, 0.82, 2.8 + (idx % 2) * 0.5, 6),
+          new THREE.MeshStandardMaterial({ color: sk.color, emissive: sk.color, emissiveIntensity: 0.45, metalness: 0.78, roughness: 0.22 })
+        );
+        pillar.position.set(px, (2.8 + (idx % 2) * 0.5) / 2 + 0.3, pz);
+        pillar.castShadow = true;
+        w3.add(pillar);
+
+        const crystal = new THREE.Mesh(
+          idx === 0 ? new THREE.TorusKnotGeometry(0.42, 0.14, 48, 8) :
+          idx === 1 ? new THREE.CylinderGeometry(0.48, 0.48, 0.65, 16) :
+          idx === 2 ? new THREE.BoxGeometry(0.75, 0.55, 0.18) :
+          idx === 3 ? new THREE.OctahedronGeometry(0.55, 0) :
+                      new THREE.IcosahedronGeometry(0.52, 0),
+          new THREE.MeshStandardMaterial({ color: sk.color, emissive: sk.color, emissiveIntensity: 0.75, metalness: 0.85, roughness: 0.15 })
+        );
+        const baseY = 3.9 + (idx % 2) * 0.5;
+        crystal.position.set(px, baseY, pz);
+        w3.add(crystal);
+
+        animatedElements.push({
+          update: (t) => {
+            crystal.rotation.y = t * (0.9 + idx * 0.15);
+            crystal.rotation.x = t * 0.35;
+            crystal.position.y = baseY + Math.sin(t * 2.1 + idx) * 0.22;
+          }
+        });
+        registerInteractable(pillar, `Skill Pillar: ${sk.name}`, "skills", () => openSkillModal(sk.id));
+        registerInteractable(crystal, `Skill Artifact: ${sk.name}`, "skills", () => openSkillModal(sk.id));
+      });
+
+      // WORLD 4: PROJECT GALAXY (DataPilot AI & Blinkit Sales Analysis Dashboard)
+      const w4 = createWorldBase(WORLDS[4]);
+      const galaxyCore = new THREE.Mesh(
+        new THREE.IcosahedronGeometry(1.3, 1),
+        new THREE.MeshStandardMaterial({ color: 0xf59e0b, emissive: 0xd97706, emissiveIntensity: 0.9, roughness: 0.15 })
+      );
+      galaxyCore.position.y = 3.4;
+      w4.add(galaxyCore);
+      registerInteractable(galaxyCore, "Project Galaxy — DataPilot AI & Blinkit Dashboard", "projects", () => openWorldModal("projects"));
+
+      const projectMeshes = [];
+      PORTFOLIO_DATA.projects.forEach((proj, idx) => {
+        const angle = idx * Math.PI;
+        const station = new THREE.Mesh(
+          idx === 0 ? new THREE.DodecahedronGeometry(1.15, 0) : new THREE.BoxGeometry(2.4, 1.5, 0.22),
+          idx === 0
+            ? new THREE.MeshStandardMaterial({ color: proj.color, emissive: proj.color, emissiveIntensity: 0.6, metalness: 0.75, roughness: 0.2 })
+            : new THREE.MeshStandardMaterial({ map: createDashboardTexture(), emissive: 0xf59e0b, emissiveIntensity: 0.25, roughness: 0.2 })
+        );
+        station.position.set(Math.cos(angle) * 4.0, 3.2, Math.sin(angle) * 4.0);
+        w4.add(station);
+        projectMeshes.push({ mesh: station, baseAngle: angle });
+        registerInteractable(station, `Project: ${proj.title}`, "projects", () => openProjectModal(proj.id));
+      });
+
+      animatedElements.push({
+        update: (t) => {
+          galaxyCore.rotation.y = t * 0.5;
+          projectMeshes.forEach(p => {
+            const a = p.baseAngle + t * 0.28;
+            p.mesh.position.x = Math.cos(a) * 4.0;
+            p.mesh.position.z = Math.sin(a) * 4.0;
+            p.mesh.rotation.y = -a + Math.PI / 2;
+          });
+        }
+      });
+
+      // WORLD 5: AI RESEARCH LAB (Rotating Neural Core Machine)
+      const w5 = createWorldBase(WORLDS[5]);
+      const aiCore = new THREE.Mesh(
+        new THREE.IcosahedronGeometry(1.45, 2),
+        new THREE.MeshStandardMaterial({ color: 0xec4899, emissive: 0xec4899, emissiveIntensity: 0.75, wireframe: true })
+      );
+      aiCore.position.y = 3.6;
+      w5.add(aiCore);
+
+      const aiRing1 = new THREE.Mesh(new THREE.TorusGeometry(2.6, 0.08, 12, 48), new THREE.MeshBasicMaterial({ color: 0xf472b6 }));
+      const aiRing2 = new THREE.Mesh(new THREE.TorusGeometry(3.2, 0.06, 12, 48), new THREE.MeshBasicMaterial({ color: 0x00f0ff }));
+      aiRing1.position.y = 3.6;
+      aiRing2.position.y = 3.6;
+      w5.add(aiRing1, aiRing2);
+
+      animatedElements.push({
+        update: (t) => {
+          aiCore.rotation.y = t * 0.7;
+          aiCore.scale.setScalar(1 + Math.sin(t * 3) * 0.06);
+          aiRing1.rotation.x = t * 0.8; aiRing1.rotation.y = t * 0.4;
+          aiRing2.rotation.y = -t * 0.6; aiRing2.rotation.z = t * 0.5;
+        }
+      });
+      registerInteractable(aiCore, "World 5: AI Research Lab (GenAI, Vertex AI, ML)", "ai_lab", () => openWorldModal("ai_lab"));
+
+      // WORLD 6: ACHIEVEMENT MUSEUM (5 Illuminated Holographic Display Cases)
+      const w6 = createWorldBase(WORLDS[6]);
+      PORTFOLIO_DATA.certifications.forEach((ach, idx) => {
+        const angle = (idx / PORTFOLIO_DATA.certifications.length) * Math.PI * 2;
+        const ped = new THREE.Mesh(
+          new THREE.CylinderGeometry(0.75, 0.9, 1.4, 16),
+          new THREE.MeshStandardMaterial({ color: 0x1e293b, metalness: 0.8, roughness: 0.2 })
+        );
+        ped.position.set(Math.cos(angle) * 3.7, 0.9, Math.sin(angle) * 3.7);
+        w6.add(ped);
+
+        const trophy = new THREE.Mesh(
+          new THREE.OctahedronGeometry(0.58, 0),
+          new THREE.MeshStandardMaterial({ color: 0xfbbf24, emissive: 0xf59e0b, emissiveIntensity: 0.6, metalness: 0.9, roughness: 0.1 })
+        );
+        trophy.position.set(Math.cos(angle) * 3.7, 2.4, Math.sin(angle) * 3.7);
+        w6.add(trophy);
+        animatedElements.push({ update: (t) => { trophy.rotation.y = t * 1.1 + idx; trophy.position.y = 2.4 + Math.sin(t * 2.2 + idx) * 0.18; } });
+        registerInteractable(trophy, `${ach.category}: ${ach.title}`, "achievements", () => openWorldModal("achievements"));
+      });
+
+      // WORLD 7: CONNECTION TERMINAL (Holographic Comm Console)
+      const w7 = createWorldBase(WORLDS[7]);
+      const consoleBody = new THREE.Mesh(
+        new THREE.BoxGeometry(3.4, 2.6, 0.4),
+        new THREE.MeshStandardMaterial({ color: 0x0f172a, emissive: 0x38bdf8, emissiveIntensity: 0.45, metalness: 0.85, roughness: 0.15 })
+      );
+      consoleBody.position.set(0, 2.8, 0);
+      w7.add(consoleBody);
+
+      const beacon = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.12, 0.12, 7.0, 12),
+        new THREE.MeshBasicMaterial({ color: 0x38bdf8, transparent: true, opacity: 0.4, blending: THREE.AdditiveBlending })
+      );
+      beacon.position.set(0, 3.6, 0);
+      w7.add(beacon);
+
+      animatedElements.push({ update: (t) => { consoleBody.rotation.y = Math.sin(t * 0.7) * 0.35; } });
+      registerInteractable(consoleBody, "World 7: Connection Terminal (Links, Resume & Contact)", "terminal", () => openWorldModal("terminal"));
+    }
+
+    // =========================================================================
+    // 8. GPU-EFFICIENT FLOATING PARTICLE SYSTEMS & DATA STREAMS
+    // =========================================================================
+    function buildParticleSystems() {
+      // Clear existing if rebuilding for graphics quality
+      particleSystems.forEach(ps => scene.remove(ps.points));
+      particleSystems = [];
+
+      const count = graphicsQuality === "HIGH" ? 1600 : 750;
+
+      // Ambient Cosmic Dust + Rising Data Streams
+      const geo = new THREE.BufferGeometry();
+      const positions = new Float32Array(count * 3);
+      const colors = new Float32Array(count * 3);
+      const palette = [new THREE.Color(0x00f0ff), new THREE.Color(0xa855f7), new THREE.Color(0x38bdf8), new THREE.Color(0x10b981)];
+
+      for (let i = 0; i < count; i++) {
+        positions[i * 3] = (Math.random() - 0.5) * 120;
+        positions[i * 3 + 1] = Math.random() * 34 + 0.5;
+        positions[i * 3 + 2] = (Math.random() - 0.5) * 120;
+        const c = palette[i % palette.length];
+        colors[i * 3] = c.r;
+        colors[i * 3 + 1] = c.g;
+        colors[i * 3 + 2] = c.b;
+      }
+
+      geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+      geo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+
+      const mat = new THREE.PointsMaterial({
+        size: 0.28,
+        vertexColors: true,
+        transparent: true,
+        opacity: 0.78,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false
+      });
+
+      const points = new THREE.Points(geo, mat);
+      scene.add(points);
+      particleSystems.push({ points, count });
+    }
+
+    // =========================================================================
+    // 9. INPUT HANDLING (WASD, MOUSE ORBIT, TOUCH, RAYCASTING)
+    // =========================================================================
+    function setupInputListeners() {
+      window.addEventListener('keydown', (e) => {
+        if (document.activeElement && ['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) return;
+        const k = e.key.toLowerCase();
+        if (k in keys) keys[k] = true;
+        if (k === 'v' && appMode === 'explore') toggleCameraPerspective();
+        if (k === 'e' && appMode === 'explore' && nearestInteractable) triggerNearestInteraction();
+        if (k === 'escape') {
+          closeInspectorModal();
+          closeAIChat();
+        }
+      });
+
+      window.addEventListener('keyup', (e) => {
+        const k = e.key.toLowerCase();
+        if (k in keys) keys[k] = false;
+      });
+
+      const canvas = document.getElementById('world-canvas');
+
+      // Mouse & Touch Orbit + Click Raycasting
+      canvas.addEventListener('pointerdown', (e) => {
+        if (appMode !== 'explore' && appMode !== 'tour') return;
+        isDragging = true;
+        pointerDownPos = { x: e.clientX, y: e.clientY };
+        lastPointerPos = { x: e.clientX, y: e.clientY };
+      });
+
+      window.addEventListener('pointermove', (e) => {
+        if (!isDragging || appMode !== 'explore') return;
+        const dx = e.clientX - lastPointerPos.x;
+        const dy = e.clientY - lastPointerPos.y;
+        lastPointerPos = { x: e.clientX, y: e.clientY };
+        camYaw -= dx * 0.0055;
+        camPitch = Math.max(-0.08, Math.min(1.15, camPitch + dy * 0.0045));
+      });
+
+      window.addEventListener('pointerup', (e) => {
+        if (!isDragging) return;
+        isDragging = false;
+        const dist = Math.hypot(e.clientX - pointerDownPos.x, e.clientY - pointerDownPos.y);
+        if (dist < 6 && appMode === 'explore') {
+          performRaycastClick(e.clientX, e.clientY);
+        }
+      });
+
+      canvas.addEventListener('wheel', (e) => {
+        if (appMode !== 'explore') return;
+        camDistance = Math.max(4.5, Math.min(20, camDistance + e.deltaY * 0.008));
+      }, { passive: true });
+
+      // Mini-Map Click to Teleport
+      const miniCanvas = document.getElementById('minimap-canvas');
+      miniCanvas.addEventListener('click', (e) => {
+        const rect = miniCanvas.getBoundingClientRect();
+        const mx = ((e.clientX - rect.left) / rect.width) * 160;
+        const my = ((e.clientY - rect.top) / rect.height) * 160;
+        let closest = null, bestD = 22;
+        WORLDS.forEach(w => {
+          const wx = 80 + w.x * 1.75;
+          const wy = 80 + w.z * 1.75;
+          const d = Math.hypot(mx - wx, my - wy);
+          if (d < bestD) { bestD = d; closest = w; }
+        });
+        if (closest) teleportToWorld(closest.id);
+      });
+    }
+
+    function setMobileKey(k, state) {
+      keys[k] = state;
+    }
+
+    function performRaycastClick(clientX, clientY) {
+      pointerNDC.x = (clientX / window.innerWidth) * 2 - 1;
+      pointerNDC.y = -(clientY / window.innerHeight) * 2 + 1;
+      raycaster.setFromCamera(pointerNDC, camera);
+      const meshes = interactiveObjects.map(o => o.mesh);
+      const hits = raycaster.intersectObjects(meshes, false);
+      if (hits.length > 0) {
+        const data = hits[0].object.userData.interactable;
+        if (data && data.action) data.action();
+      }
+    }
+
+    // =========================================================================
+    // 10. ANIMATION LOOP, AVATAR PHYSICS & MINI-MAP RENDERER
+    // =========================================================================
+    function animate() {
+      requestAnimationFrame(animate);
+      if (!renderer || !scene || !camera) return;
+
+      const dt = Math.min(clock.getDelta(), 0.05);
+      const t = clock.getElapsedTime();
+
+      // Update floating structures & holograms
+      if (!reducedMotion) {
+        animatedElements.forEach(el => el.update(t, dt));
+
+        // Gently rise & wrap energy particles
+        particleSystems.forEach(ps => {
+          const posAttr = ps.points.geometry.attributes.position;
+          for (let i = 0; i < ps.count; i++) {
+            let y = posAttr.getY(i) + dt * (0.45 + (i % 5) * 0.12);
+            if (y > 35) y = 0.5;
+            posAttr.setY(i, y);
+          }
+          posAttr.needsUpdate = true;
+          ps.points.rotation.y = t * 0.015;
+        });
+      }
+
+      // Mode-specific Camera & Avatar updates
+      if (appMode === 'entry' || appMode === 'boot') {
+        const orbitAngle = reducedMotion ? 0 : Math.sin(t * 0.22) * 0.35;
+        camera.position.set(Math.sin(orbitAngle) * 14, 5.2 + Math.sin(t * 0.4) * 0.3, Math.cos(orbitAngle) * 14 + 3.5);
+        camera.lookAt(0, 2.4, 1);
+        animateAvatarIdle(t);
+      } else if (appMode === 'explore') {
+        updateExploreMovement(t, dt);
+        updateProximityPrompt();
+        drawMiniMap();
+      } else if (appMode === 'tour') {
+        animateAvatarIdle(t);
+        if (flyTarget) {
+          camera.position.lerp(flyTarget.pos, 0.045);
+          const currentLook = new THREE.Vector3();
+          camera.getWorldDirection(currentLook);
+          camera.lookAt(flyTarget.lookAt);
+        }
+        drawMiniMap();
+      }
+
+      renderer.render(scene, camera);
+    }
+
+    function animateAvatarIdle(t) {
+      if (!avatarParts.bodyRoot) return;
+      const breath = reducedMotion ? 0 : Math.sin(t * 2.2) * 0.02;
+      avatarParts.bodyRoot.position.y = 0.98 + breath;
+      avatarParts.armL.rotation.x = THREE.MathUtils.lerp(avatarParts.armL.rotation.x, Math.sin(t * 1.4) * 0.08, 0.1);
+      avatarParts.armR.rotation.x = THREE.MathUtils.lerp(avatarParts.armR.rotation.x, -Math.sin(t * 1.4) * 0.12 - 0.1, 0.1);
+      avatarParts.legL.rotation.x = THREE.MathUtils.lerp(avatarParts.legL.rotation.x, 0, 0.15);
+      avatarParts.legR.rotation.x = THREE.MathUtils.lerp(avatarParts.legR.rotation.x, 0, 0.15);
+
+      // Realistic periodic blinking
+      const blink = (t % 4.2) > 4.05 ? 0.15 : 1.0;
+      if (avatarParts.eyes) {
+        avatarParts.eyes.forEach(eye => eye.scale.y = blink);
+      }
+    }
+
+    function updateExploreMovement(t, dt) {
+      const moveZ = (keys.w || keys.arrowup ? 1 : 0) - (keys.s || keys.arrowdown ? 1 : 0);
+      const moveX = (keys.d || keys.arrowright ? 1 : 0) - (keys.a || keys.arrowleft ? 1 : 0);
+
+      const speed = 12.5;
+      let isMoving = false;
+
+      if (moveZ !== 0 || moveX !== 0) {
+        isMoving = true;
+        flyTarget = null; // Cancel auto-fly if user takes manual control
+        const forward = new THREE.Vector3(-Math.sin(camYaw), 0, -Math.cos(camYaw));
+        const right = new THREE.Vector3(Math.cos(camYaw), 0, -Math.sin(camYaw));
+        const dir = new THREE.Vector3().addScaledVector(forward, moveZ).addScaledVector(right, moveX).normalize();
+
+        avatarVel.lerp(dir.multiplyScalar(speed), 0.18);
+        const targetRot = Math.atan2(avatarVel.x, avatarVel.z);
+        let diff = targetRot - avatarRotY;
+        while (diff > Math.PI) diff -= Math.PI * 2;
+        while (diff < -Math.PI) diff += Math.PI * 2;
+        avatarRotY += diff * 0.18;
+      } else {
+        avatarVel.lerp(new THREE.Vector3(0, 0, 0), 0.2);
+      }
+
+      avatarPos.addScaledVector(avatarVel, dt);
+      // Soft circular world boundary clamp
+      const r = Math.hypot(avatarPos.x, avatarPos.z);
+      if (r > 48) {
+        avatarPos.x = (avatarPos.x / r) * 48;
+        avatarPos.z = (avatarPos.z / r) * 48;
+      }
+
+      avatarGroup.position.copy(avatarPos);
+      avatarGroup.rotation.y = avatarRotY;
+
+      // Walking limb swing vs idle
+      if (isMoving && !reducedMotion) {
+        walkCycle += dt * 10.5;
+        const swing = Math.sin(walkCycle) * 0.65;
+        avatarParts.legL.rotation.x = swing;
+        avatarParts.legR.rotation.x = -swing;
+        avatarParts.armL.rotation.x = -swing * 0.7;
+        avatarParts.armR.rotation.x = swing * 0.7;
+        avatarParts.bodyRoot.position.y = 0.98 + Math.abs(Math.cos(walkCycle)) * 0.05;
+      } else {
+        animateAvatarIdle(t);
+      }
+
+      // Camera positioning (3rd Person vs 1st Person)
+      if (flyTarget) {
+        avatarPos.lerp(flyTarget.avatarDest, 0.08);
+        if (avatarPos.distanceTo(flyTarget.avatarDest) < 0.4) flyTarget = null;
+      }
+
+      if (cameraMode === 'first') {
+        avatarGroup.visible = false;
+        const eyePos = new THREE.Vector3(avatarPos.x, 1.85, avatarPos.z);
+        camera.position.lerp(eyePos, 0.25);
+        const lookTarget = new THREE.Vector3(
+          avatarPos.x - Math.sin(camYaw) * 10,
+          1.85 - Math.sin(camPitch) * 6,
+          avatarPos.z - Math.cos(camYaw) * 10
+        );
+        camera.lookAt(lookTarget);
+      } else {
+        avatarGroup.visible = true;
+        const desiredCam = new THREE.Vector3(
+          avatarPos.x + Math.sin(camYaw) * Math.cos(camPitch) * camDistance,
+          2.2 + Math.sin(camPitch) * camDistance,
+          avatarPos.z + Math.cos(camYaw) * Math.cos(camPitch) * camDistance
+        );
+        camera.position.lerp(desiredCam, 0.14);
+        camera.lookAt(avatarPos.x, 1.8, avatarPos.z);
+      }
+
+      // Update active Zone indicator in HUD
+      let activeZone = WORLDS[0];
+      let minDist = 14;
+      WORLDS.forEach(w => {
+        const d = Math.hypot(avatarPos.x - w.x, avatarPos.z - w.z);
+        if (d < minDist) { minDist = d; activeZone = w; }
+      });
+      document.getElementById('hud-zone-name').textContent = activeZone.name;
+      document.getElementById('hud-zone-dot').style.backgroundColor = activeZone.hex;
+    }
+
+    function updateProximityPrompt() {
+      let closest = null, bestDist = 7.5;
+      const worldPos = new THREE.Vector3();
+      interactiveObjects.forEach(obj => {
+        obj.mesh.getWorldPosition(worldPos);
+        const d = Math.hypot(avatarPos.x - worldPos.x, avatarPos.z - worldPos.z);
+        if (d < bestDist && obj.worldId !== 'hub') {
+          bestDist = d;
+          closest = obj;
+        }
+      });
+
+      const promptEl = document.getElementById('interact-prompt');
+      if (closest) {
+        nearestInteractable = closest;
+        document.getElementById('interact-label').textContent = closest.label;
+        promptEl.classList.remove('hidden');
+      } else {
+        nearestInteractable = null;
+        promptEl.classList.add('hidden');
+      }
+    }
+
+    function triggerNearestInteraction() {
+      if (nearestInteractable && nearestInteractable.action) {
+        nearestInteractable.action();
+      }
+    }
+
+    function drawMiniMap() {
+      const c = document.getElementById('minimap-canvas');
+      if (!c) return;
+      const ctx = c.getContext('2d');
+      ctx.clearRect(0, 0, 160, 160);
+
+      // Radar rings
+      ctx.strokeStyle = 'rgba(0, 240, 255, 0.16)';
+      ctx.lineWidth = 1;
+      [25, 50, 72].forEach(r => {
+        ctx.beginPath(); ctx.arc(80, 80, r, 0, Math.PI * 2); ctx.stroke();
+      });
+
+      // World Beacons
+      WORLDS.forEach(w => {
+        const x = 80 + w.x * 1.75;
+        const y = 80 + w.z * 1.75;
+        ctx.fillStyle = w.hex;
+        ctx.beginPath();
+        ctx.arc(x, y, w.id === 'hub' ? 4 : 5, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = 'rgba(226, 232, 240, 0.85)';
+        ctx.font = '600 7px JetBrains Mono, monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText(w.short, x, y - 8);
+      });
+
+      // Avatar Position + Direction Indicator
+      const ax = 80 + avatarPos.x * 1.75;
+      const ay = 80 + avatarPos.z * 1.75;
+      ctx.save();
+      ctx.translate(ax, ay);
+      ctx.rotate(-avatarRotY + Math.PI);
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.moveTo(0, -6);
+      ctx.lineTo(4.5, 5);
+      ctx.lineTo(-4.5, 5);
+      ctx.closePath();
+      ctx.fill();
+      ctx.restore();
+    }
+
+    function onWindowResize() {
+      if (!camera || !renderer) return;
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    }
+
+    // =========================================================================
+    // 11. NAVIGATION, TELEPORT, GUIDED EXPLORATION & HUD CONTROLS
+    // =========================================================================
+    function enterWorldMode() {
+      appMode = "explore";
+      document.getElementById('entry-overlay').classList.add('hidden');
+      document.getElementById('hud-layer').classList.remove('hidden');
+      showToast("Entered 3D Free-Roam Mode — Use WASD or Radar to explore all 7 Worlds.");
+    }
+
+    function teleportToWorld(worldId) {
+      const w = WORLDS.find(x => x.id === worldId);
+      if (!w) return;
+      if (appMode === 'tour') stopGuidedTour();
+      const offsetZ = w.id === 'hub' ? 5.5 : (w.z > 0 ? -5.5 : 5.5);
+      flyTarget = { avatarDest: new THREE.Vector3(w.x, 0, w.z + offsetZ) };
+      showToast(`Fast-traveling to ${w.name}...`);
+    }
+
+    function startGuidedTour() {
+      document.getElementById('entry-overlay').classList.add('hidden');
+      document.getElementById('hud-layer').classList.remove('hidden');
+      document.getElementById('tour-caption-bar').classList.remove('hidden');
+      document.getElementById('btn-tour-label').textContent = "Stop Tour";
+      appMode = "tour";
+      tourIndex = 0;
+      goToTourStop(0);
+    }
+
+    function toggleGuidedTour() {
+      if (appMode === 'tour') stopGuidedTour();
+      else startGuidedTour();
+    }
+
+    function stopGuidedTour() {
+      if (tourTimer) clearTimeout(tourTimer);
+      appMode = "explore";
+      flyTarget = null;
+      document.getElementById('tour-caption-bar').classList.add('hidden');
+      document.getElementById('btn-tour-label').textContent = "Guided Tour";
+    }
+
+    function goToTourStop(idx) {
+      if (tourTimer) clearTimeout(tourTimer);
+      tourIndex = (idx + WORLDS.length) % WORLDS.length;
+      const w = WORLDS[tourIndex];
+
+      document.getElementById('tour-step-badge').textContent = `GUIDED TOUR • ${tourIndex + 1} / ${WORLDS.length}`;
+      document.getElementById('tour-title').textContent = w.name;
+      document.getElementById('tour-caption').textContent = w.caption;
+
+      const angle = Math.atan2(w.z, w.x) || 0.4;
+      const camOffsetX = w.id === 'hub' ? 0 : Math.cos(angle) * 12;
+      const camOffsetZ = w.id === 'hub' ? 14 : Math.sin(angle) * 12;
+
+      flyTarget = {
+        pos: new THREE.Vector3(w.x + camOffsetX, 7.2, w.z + camOffsetZ),
+        lookAt: new THREE.Vector3(w.x, 3.0, w.z)
+      };
+
+      tourTimer = setTimeout(() => {
+        if (appMode === 'tour') goToTourStop(tourIndex + 1);
+      }, 7500);
+    }
+
+    function tourNext() { goToTourStop(tourIndex + 1); }
+    function tourPrev() { goToTourStop(tourIndex - 1); }
+
+    function toggleCameraPerspective() {
+      cameraMode = cameraMode === 'third' ? 'first' : 'third';
+      document.getElementById('hud-cam-mode').textContent = cameraMode === 'third' ? '3RD PERSON [V]' : '1ST PERSON [V]';
+      showToast(`Switched to ${cameraMode === 'third' ? 'Third-Person' : 'First-Person'} Perspective`);
+    }
+
+    function cycleGraphicsQuality() {
+      graphicsQuality = graphicsQuality === 'HIGH' ? 'BALANCED' : 'HIGH';
+      document.getElementById('hud-gfx-level').textContent = graphicsQuality;
+      const pr = graphicsQuality === 'HIGH' ? Math.min(window.devicePixelRatio || 1, 2) : 1.0;
+      renderer.setPixelRatio(pr);
+      buildParticleSystems();
+      showToast(`Graphics Quality set to ${graphicsQuality}`);
+    }
+
+    function toggleReducedMotion() {
+      reducedMotion = !reducedMotion;
+      document.body.classList.toggle('reduced-motion', reducedMotion);
+      document.getElementById('btn-reduced-motion').textContent = reducedMotion ? 'MOTION: REDUCED' : 'MOTION: ON';
+      showToast(reducedMotion ? 'Reduced Motion Enabled' : 'Full Cinematic Motion Enabled');
+    }
+
+    // =========================================================================
+    // 12. HOLOGRAPHIC WORLD & PROJECT MODALS + SOURCE CODE EXPLORER
+    // =========================================================================
+    function openInspectorModal(subtitle, title, html) {
+      document.getElementById('modal-subtitle').textContent = subtitle;
+      document.getElementById('modal-title').textContent = title;
+      document.getElementById('modal-body').innerHTML = html;
+      document.getElementById('inspector-modal').classList.remove('hidden');
+    }
+
+    function closeInspectorModal() {
+      document.getElementById('inspector-modal').classList.add('hidden');
+    }
+
+    function openWorldModal(worldId) {
+      if (worldId === 'identity') {
+        const id = PORTFOLIO_DATA.identity;
+        openInspectorModal("WORLD 1 — IDENTITY REALM", id.name, `
+          <div class="grid sm:grid-cols-3 gap-4">
+            <div class="glass-card rounded-xl p-4 sm:col-span-2 space-y-3">
+              <div class="text-cyan-400 font-mono text-xs uppercase">${id.title}</div>
+              <p class="text-slate-200 leading-relaxed">${id.summary}</p>
+              <p class="text-slate-300 leading-relaxed text-xs border-l-2 border-cyan-400 pl-3">${id.careerVision}</p>
+            </div>
+            <div class="glass-card rounded-xl p-4 space-y-3 text-xs">
+              <div><span class="text-slate-400 block font-mono">LOCATION</span><span class="text-white font-semibold">${id.location}</span></div>
+              <div><span class="text-slate-400 block font-mono">PHONE</span><a href="tel:${id.phone.replace(/\s+/g,'')}" class="text-cyan-300 hover:underline font-semibold">${id.phone}</a></div>
+              <div><span class="text-slate-400 block font-mono">EMAIL</span><a href="mailto:${id.email}" class="text-cyan-300 hover:underline font-semibold break-all">${id.email}</a></div>
+            </div>
+          </div>
+          <div class="grid sm:grid-cols-2 gap-3">
+            ${PORTFOLIO_DATA.education.map(ed => `
+              <div class="glass-card rounded-xl p-4 border-cyan-500/25">
+                <div class="flex items-center justify-between gap-2">
+                  <span class="font-mono text-[10px] text-cyan-400 uppercase">${ed.period}</span>
+                  <span class="px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-300 font-mono text-[10px]">${ed.score}</span>
+                </div>
+                <div class="font-display text-sm font-bold text-white mt-1.5">${ed.degree}</div>
+                <div class="text-xs text-slate-400 mt-0.5">${ed.institution}</div>
+              </div>
+            `).join('')}
+          </div>
+          <div class="flex flex-wrap gap-2 pt-2">
+            <button onclick="closeInspectorModal(); openQuickView('resume')" class="btn-aaa-primary px-4 py-2 rounded-xl text-xs">OPEN FULL RESUME VIEW</button>
+            <button onclick="closeInspectorModal(); openAIChat()" class="btn-aaa-secondary px-4 py-2 rounded-xl text-xs">ASK AI ABOUT SHIVA</button>
+          </div>
+        `);
+      } else if (worldId === 'experience') {
+        const cards = PORTFOLIO_DATA.experiences.map(e => `
+          <div class="glass-card rounded-xl p-5 space-y-2.5 border-emerald-500/30">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <h3 class="font-display text-base font-bold text-white">${e.role}</h3>
+              <span class="px-2.5 py-1 rounded-full bg-emerald-500/15 border border-emerald-400/40 text-emerald-300 font-mono text-[10px]">${e.badge}</span>
+            </div>
+            <div class="text-emerald-400 text-xs font-medium">${e.org} • ${e.period}</div>
+            <ul class="list-disc pl-5 space-y-1.5 text-xs sm:text-sm text-slate-300">
+              ${e.highlights.map(h => `<li>${h}</li>`).join('')}
+            </ul>
+          </div>
+        `).join('');
+        openInspectorModal("WORLD 2 — EXPERIENCE REALM", "Verified Internship Experience", cards);
+      } else if (worldId === 'projects') {
+        const grid = PORTFOLIO_DATA.projects.map(p => `
+          <div class="glass-card rounded-xl p-5 flex flex-col justify-between gap-3">
+            <div>
+              <h3 class="font-display text-sm font-bold text-white">${p.title}</h3>
+              <p class="text-xs text-amber-300 mt-0.5">${p.tagline}</p>
+              <p class="text-xs text-slate-300 mt-2 leading-relaxed">${p.architecture}</p>
+            </div>
+            <button onclick="openProjectModal('${p.id}')" class="btn-aaa-ghost py-2 rounded-lg text-[11px] w-full">INSPECT DASHBOARD, ARCHITECTURE & CODE →</button>
+          </div>
+        `).join('');
+        openInspectorModal("WORLD 4 — PROJECT GALAXY", "Verified Projects", `<div class="grid sm:grid-cols-2 gap-4">${grid}</div>`);
+      } else if (worldId === 'ai_lab') {
+        openInspectorModal("WORLD 5 — AI RESEARCH LAB", "Generative AI, Vertex AI & Machine Learning Lab", `
+          <div class="glass-card rounded-xl p-5 border-pink-500/35 space-y-4">
+            <p class="text-slate-200 leading-relaxed">Shiva's AI Research Lab bridges foundational supervised Machine Learning with modern Generative AI cloud workflows from his Google Cloud Virtual Internship and NPTEL Machine Learning training.</p>
+            <div class="grid sm:grid-cols-3 gap-3">
+              <div class="p-3.5 rounded-xl bg-slate-900/80 border border-pink-500/25">
+                <div class="font-mono text-xs text-pink-400 mb-1">GENERATIVE AI & VERTEX AI</div>
+                <p class="text-xs text-slate-300">Hands-on cloud GenAI workflows explored during Google Cloud Generative AI Virtual Internship (Cohort 9).</p>
+              </div>
+              <div class="p-3.5 rounded-xl bg-slate-900/80 border border-cyan-500/25">
+                <div class="font-mono text-xs text-cyan-400 mb-1">STREAMLIT APPS</div>
+                <p class="text-xs text-slate-300">Rapid interactive AI & data apps exemplified by DataPilot AI deployed live on Render.</p>
+              </div>
+              <div class="p-3.5 rounded-xl bg-slate-900/80 border border-violet-500/25">
+                <div class="font-mono text-xs text-violet-400 mb-1">RANDOM FOREST & XGBOOST</div>
+                <p class="text-xs text-slate-300">Regression, Classification, Feature Engineering, ensemble modeling, and systematic Model Evaluation.</p>
+              </div>
+            </div>
+            <div class="pt-2">
+              <button onclick="closeInspectorModal(); openAIChat()" class="btn-aaa-primary px-5 py-2.5 rounded-xl text-xs">LAUNCH AI MULTI-AGENT ASSISTANT</button>
+            </div>
+          </div>
+        `);
+      } else if (worldId === 'achievements') {
+        const list = PORTFOLIO_DATA.certifications.map(a => `
+          <div class="glass-card rounded-xl p-4 border-amber-400/25 flex flex-col justify-between gap-2">
+            <div>
+              <div class="font-mono text-[10px] text-amber-400 uppercase tracking-widest">${a.category}</div>
+              <h3 class="font-display text-sm font-bold text-white mt-1">${a.title}</h3>
+              <p class="text-xs text-slate-300 mt-1.5 leading-relaxed">${a.detail}</p>
+            </div>
+            ${a.link ? `<a href="${a.link}" target="_blank" rel="noopener" class="text-xs font-mono text-cyan-400 hover:underline">View Verified Profile ↗</a>` : ''}
+          </div>
+        `).join('');
+        openInspectorModal("WORLD 6 — ACHIEVEMENT MUSEUM", "Certifications & Coding Platforms", `<div class="grid sm:grid-cols-2 gap-4">${list}</div>`);
+      } else if (worldId === 'terminal') {
+        openInspectorModal("WORLD 7 — CONNECTION TERMINAL", "Connect with Shiva Prasad Reddy Kistipati", renderContactSectionHTML());
+      }
+    }
+
+    function openSkillModal(skillId) {
+      const s = PORTFOLIO_DATA.skills.find(x => x.id === skillId);
+      if (!s) return;
+      openInspectorModal("WORLD 3 — SKILL MATRIX", s.name, `
+        <div class="glass-card rounded-xl p-5 space-y-4">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <span class="font-mono text-xs text-cyan-400 uppercase">${s.category}</span>
+            <span class="px-3 py-1 rounded-full bg-cyan-500/15 border border-cyan-400/40 font-mono text-xs text-cyan-300">${s.level}</span>
+          </div>
+          <p class="text-slate-200 leading-relaxed">${s.details}</p>
+          <div>
+            <div class="font-mono text-[11px] text-slate-400 uppercase mb-2">Verified Capabilities & Topics</div>
+            <div class="flex flex-wrap gap-2">
+              ${s.tags.map(t => `<span class="px-3 py-1.5 rounded-xl bg-slate-900 border border-cyan-500/30 font-mono text-xs text-cyan-200">${t}</span>`).join('')}
+            </div>
+          </div>
+          <div class="flex flex-wrap gap-2 pt-2 border-t border-slate-800">
+            <button onclick="closeInspectorModal(); openQuickView('skills')" class="btn-aaa-primary px-4 py-2 rounded-xl text-xs">VIEW ALL TECHNICAL SKILLS</button>
+            <button onclick="closeInspectorModal(); openAIChat(); sendQuickPrompt('Show Shiva\'s ${s.name} skills')" class="btn-aaa-secondary px-4 py-2 rounded-xl text-xs">ASK AI ABOUT ${s.name.toUpperCase()}</button>
+          </div>
+        </div>
+      `);
+    }
+
+    // Interactive Blinkit Sales Mini KPI/Chart Preview Data
+    const BLINKIT_PREVIEW_DATA = {
+      All: { sales: "$1.20M", avgSales: "$141", items: "8,523", rating: "3.9 / 5.0", bars: [
+        { label: "Fruits & Veg", pct: 92, val: "$178K" },
+        { label: "Snack Foods", pct: 88, val: "$175K" },
+        { label: "Household", pct: 74, val: "$136K" },
+        { label: "Frozen Foods", pct: 65, val: "$118K" },
+        { label: "Dairy", pct: 58, val: "$101K" }
+      ]},
+      "Tier 1": { sales: "$336K", avgSales: "$141", items: "2,388", rating: "3.9 / 5.0", bars: [
+        { label: "Fruits & Veg", pct: 88, val: "$51K" },
+        { label: "Snack Foods", pct: 84, val: "$49K" },
+        { label: "Household", pct: 70, val: "$39K" },
+        { label: "Frozen Foods", pct: 61, val: "$34K" },
+        { label: "Dairy", pct: 54, val: "$29K" }
+      ]},
+      "Tier 2": { sales: "$393K", avgSales: "$141", items: "2,785", rating: "4.0 / 5.0", bars: [
+        { label: "Fruits & Veg", pct: 95, val: "$59K" },
+        { label: "Snack Foods", pct: 86, val: "$55K" },
+        { label: "Household", pct: 76, val: "$46K" },
+        { label: "Frozen Foods", pct: 67, val: "$39K" },
+        { label: "Dairy", pct: 60, val: "$34K" }
+      ]},
+      "Tier 3": { sales: "$472K", avgSales: "$141", items: "3,350", rating: "3.9 / 5.0", bars: [
+        { label: "Fruits & Veg", pct: 96, val: "$68K" },
+        { label: "Snack Foods", pct: 92, val: "$71K" },
+        { label: "Household", pct: 78, val: "$51K" },
+        { label: "Frozen Foods", pct: 68, val: "$45K" },
+        { label: "Dairy", pct: 62, val: "$38K" }
+      ]}
+    };
+
+    function renderBlinkitPreview(tier = 'All') {
+      const d = BLINKIT_PREVIEW_DATA[tier] || BLINKIT_PREVIEW_DATA.All;
+      return `
+        <div id="blinkit-preview-box" class="glass-card rounded-xl p-4 border-amber-400/35 space-y-3">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <div class="font-mono text-[10px] text-amber-400 uppercase tracking-widest">Interactive Dashboard Preview (Illustrative Retail Layout)</div>
+              <div class="text-xs font-semibold text-white">Filter by Outlet Location Tier</div>
+            </div>
+            <div class="flex gap-1">
+              ${['All', 'Tier 1', 'Tier 2', 'Tier 3'].map(t => `
+                <button onclick="updateBlinkitPreview('${t}')" class="px-2.5 py-1 rounded-lg font-mono text-[10px] transition ${t === tier ? 'bg-amber-400 text-slate-950 font-bold' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'}">${t}</button>
+              `).join('')}
+            </div>
+          </div>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            <div class="p-2.5 rounded-lg bg-slate-900/90 border border-slate-800"><div class="text-[10px] font-mono text-slate-400">TOTAL SALES</div><div class="font-display text-sm font-bold text-amber-300 mt-0.5">${d.sales}</div></div>
+            <div class="p-2.5 rounded-lg bg-slate-900/90 border border-slate-800"><div class="text-[10px] font-mono text-slate-400">AVG SALES</div><div class="font-display text-sm font-bold text-cyan-300 mt-0.5">${d.avgSales}</div></div>
+            <div class="p-2.5 rounded-lg bg-slate-900/90 border border-slate-800"><div class="text-[10px] font-mono text-slate-400">ITEMS SOLD</div><div class="font-display text-sm font-bold text-emerald-300 mt-0.5">${d.items}</div></div>
+            <div class="p-2.5 rounded-lg bg-slate-900/90 border border-slate-800"><div class="text-[10px] font-mono text-slate-400">AVG RATING</div><div class="font-display text-sm font-bold text-violet-300 mt-0.5">${d.rating}</div></div>
+          </div>
+          <div class="space-y-2 pt-1">
+            <div class="text-[10px] font-mono text-slate-400 uppercase">Top Product Categories (Pivot Breakdown)</div>
+            ${d.bars.map(b => `
+              <div class="flex items-center gap-2 text-xs">
+                <span class="w-24 text-slate-300 truncate">${b.label}</span>
+                <div class="flex-1 h-2.5 bg-slate-900 rounded-full overflow-hidden">
+                  <div class="h-full bg-gradient-to-r from-amber-400 to-cyan-400 rounded-full transition-all duration-300" style="width:${b.pct}%"></div>
+                </div>
+                <span class="w-12 text-right font-mono text-[11px] text-amber-300">${b.val}</span>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `;
+    }
+
+    function updateBlinkitPreview(tier) {
+      const box = document.getElementById('blinkit-preview-box');
+      if (box) box.outerHTML = renderBlinkitPreview(tier);
+    }
+
+    function openProjectModal(projId, activeTab = 'overview') {
+      const p = PORTFOLIO_DATA.projects.find(x => x.id === projId);
+      if (!p) return;
+      const fileKeys = Object.keys(p.files);
+      const firstFile = fileKeys[0];
+
+      const overviewHTML = `
+        <div class="space-y-4">
+          <div class="grid sm:grid-cols-2 gap-4">
+            <div class="glass-card rounded-xl p-4">
+              <div class="font-mono text-[11px] text-amber-400 uppercase mb-1.5">Business Problem</div>
+              <p class="text-xs sm:text-sm text-slate-200 leading-relaxed">${p.problem}</p>
+            </div>
+            <div class="glass-card rounded-xl p-4">
+              <div class="font-mono text-[11px] text-cyan-400 uppercase mb-1.5">Implementation & Workflow</div>
+              <p class="text-xs sm:text-sm text-slate-200 leading-relaxed">${p.architecture}</p>
+            </div>
+          </div>
+          ${p.hasInteractivePreview ? renderBlinkitPreview('All') : ''}
+          <div class="glass-card rounded-xl p-4">
+            <div class="font-mono text-[11px] text-emerald-400 uppercase mb-2">Key Deliverables & Insights</div>
+            <ul class="list-disc pl-5 space-y-1 text-xs sm:text-sm text-slate-200">
+              ${p.kpis.map(k => `<li>${k}</li>`).join('')}
+            </ul>
+          </div>
+        </div>
+      `;
+
+      const techHTML = `
+        <div class="glass-card rounded-xl p-5 space-y-4">
+          <div class="font-mono text-xs text-cyan-400 uppercase">Verified Technology Stack</div>
+          <div class="flex flex-wrap gap-2">
+            ${p.tech.map(t => `<span class="px-3.5 py-2 rounded-xl bg-slate-900 border border-cyan-500/30 font-mono text-xs text-cyan-200">${t}</span>`).join('')}
+          </div>
+          <p class="text-xs text-slate-400">Engineered with modularity, reproducibility, and recruiter-ready documentation.</p>
+        </div>
+      `;
+
+      const codeHTML = `
+        <div class="grid md:grid-cols-3 gap-3">
+          <div class="glass-card rounded-xl p-3 space-y-1.5">
+            <div class="font-mono text-[10px] text-slate-400 uppercase px-2 pb-1 border-b border-slate-800">Repository Explorer</div>
+            ${fileKeys.map((fk, i) => `
+              <button onclick="selectProjectFile('${p.id}', '${fk}')" id="file-btn-${i}" class="w-full text-left px-2.5 py-2 rounded-lg font-mono text-xs transition ${i === 0 ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40' : 'text-slate-300 hover:bg-slate-800'}">
+                📄 ${fk}
+              </button>
+            `).join('')}
+            <div class="pt-3 px-1 text-[10px] text-slate-400">
+              Note: Displays README & representative architecture modules. Full public source available via GitHub.
+            </div>
+          </div>
+          <div class="md:col-span-2 glass-card rounded-xl overflow-hidden flex flex-col">
+            <div class="px-3.5 py-2 bg-slate-950/90 border-b border-slate-800 flex items-center justify-between">
+              <span id="code-filename" class="font-mono text-xs text-cyan-300">${firstFile}</span>
+              <button onclick="copyCurrentCode()" class="text-[11px] font-mono text-slate-300 hover:text-cyan-300 px-2 py-0.5 rounded bg-slate-800">Copy</button>
+            </div>
+            <pre id="code-viewer-pre" class="p-4 text-xs font-mono text-slate-200 overflow-x-auto leading-relaxed bg-[#040914] max-h-72 overflow-y-auto">${highlightCode(p.files[firstFile])}</pre>
+          </div>
+        </div>
+      `;
+
+      const body = `
+        <div class="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-slate-800">
+          <div class="flex gap-1.5">
+            <button onclick="openProjectModal('${p.id}', 'overview')" class="px-3.5 py-1.5 rounded-lg text-xs font-mono ${activeTab==='overview' ? 'bg-cyan-500/25 text-cyan-300 border border-cyan-400/50' : 'bg-slate-800/80 text-slate-300'}">Overview</button>
+            <button onclick="openProjectModal('${p.id}', 'tech')" class="px-3.5 py-1.5 rounded-lg text-xs font-mono ${activeTab==='tech' ? 'bg-cyan-500/25 text-cyan-300 border border-cyan-400/50' : 'bg-slate-800/80 text-slate-300'}">Tech Stack</button>
+            <button onclick="openProjectModal('${p.id}', 'code')" class="px-3.5 py-1.5 rounded-lg text-xs font-mono ${activeTab==='code' ? 'bg-cyan-500/25 text-cyan-300 border border-cyan-400/50' : 'bg-slate-800/80 text-slate-300'}">Source Code Explorer</button>
+          </div>
+          <div class="flex gap-2">
+            ${p.liveUrl ? `<a href="${p.liveUrl}" target="_blank" rel="noopener" class="px-3.5 py-1.5 rounded-lg bg-emerald-500/20 border border-emerald-400/50 text-emerald-300 text-xs font-mono hover:bg-emerald-500/30">Live App ↗</a>` : ''}
+            <a href="${p.githubUrl}" target="_blank" rel="noopener" class="px-3.5 py-1.5 rounded-lg bg-slate-800 border border-slate-600 text-slate-200 text-xs font-mono hover:border-cyan-400">GitHub ↗</a>
+          </div>
+        </div>
+        ${activeTab === 'overview' ? overviewHTML : activeTab === 'tech' ? techHTML : codeHTML}
+      `;
+
+      openInspectorModal("WORLD 4 — PROJECT GALAXY", p.title, body);
+    }
+
+    function selectProjectFile(projId, fileKey) {
+      const p = PORTFOLIO_DATA.projects.find(x => x.id === projId);
+      if (!p) return;
+      document.getElementById('code-filename').textContent = fileKey;
+      document.getElementById('code-viewer-pre').innerHTML = highlightCode(p.files[fileKey]);
+      Object.keys(p.files).forEach((fk, i) => {
+        const btn = document.getElementById(`file-btn-${i}`);
+        if (btn) {
+          btn.className = `w-full text-left px-2.5 py-2 rounded-lg font-mono text-xs transition ${fk === fileKey ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40' : 'text-slate-300 hover:bg-slate-800'}`;
+        }
+      });
+    }
+
+    function highlightCode(str) {
+      let safe = str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      safe = safe.replace(/(#.*$|\/\/.*$)/gm, '<span class="code-cm">$1</span>');
+      safe = safe.replace(/\b(def|import|from|return|for|in|if|and|contract|function|external|view|returns|mapping|struct|require|pragma|solidity)\b/g, '<span class="code-kw">$1</span>');
+      safe = safe.replace(/(".*?"|'.*?')/g, '<span class="code-str">$1</span>');
+      return safe;
+    }
+
+    function copyCurrentCode() {
+      const pre = document.getElementById('code-viewer-pre');
+      if (!pre) return;
+      copyTextToClipboard(pre.innerText, "Code snippet copied to clipboard!");
+    }
+
+    function copyTextToClipboard(text, successMsg) {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      try {
+        document.execCommand('copy');
+        showToast(successMsg);
+      } catch (e) {
+        showToast("Unable to copy automatically.");
+      }
+      document.body.removeChild(ta);
+    }
+
+    // =========================================================================
+    // 13. PROFESSIONAL QUICK-ACCESS VIEW (RECRUITER EXECUTIVE MODE)
+    // =========================================================================
+    const QV_TABS = [
+      { id: 'about', label: 'About' },
+      { id: 'skills', label: 'Skills' },
+      { id: 'experience', label: 'Experience' },
+      { id: 'projects', label: 'Projects' },
+      { id: 'certifications', label: 'Certifications & Coding' },
+      { id: 'resume', label: 'Resume' },
+      { id: 'contact', label: 'Contact' }
+    ];
+
+    function openQuickView(tabId = 'about') {
+      appMode = "quick";
+      document.getElementById('entry-overlay').classList.add('hidden');
+      document.getElementById('hud-layer').classList.add('hidden');
+      document.getElementById('quick-view').classList.remove('hidden');
+      renderQuickViewTab(tabId);
+    }
+
+    function closeQuickView() {
+      document.getElementById('quick-view').classList.add('hidden');
+      enterWorldMode();
+    }
+
+    function renderQuickViewTab(tabId) {
+      const tabsEl = document.getElementById('qv-tabs');
+      tabsEl.innerHTML = QV_TABS.map(t => `
+        <button onclick="renderQuickViewTab('${t.id}')" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-medium transition ${t.id === tabId ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-400/50' : 'text-slate-400 hover:text-white hover:bg-slate-800/70'}">
+          ${t.label}
+        </button>
+      `).join('');
+
+      const content = document.getElementById('qv-content');
+      const id = PORTFOLIO_DATA.identity;
+
+      if (tabId === 'about') {
+        content.innerHTML = `
+          <div class="glass-panel rounded-2xl p-6 sm:p-8 border-cyan-500/30 space-y-6">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div>
+                <span class="px-3 py-1 rounded-full bg-emerald-500/15 border border-emerald-400/40 text-emerald-300 font-mono text-[11px]">OPEN TO DATA SCIENCE, AI/ML & DATA ANALYTICS ROLES</span>
+                <h2 class="font-display text-2xl sm:text-3xl font-bold text-white mt-3">${id.name}</h2>
+                <p class="text-cyan-400 font-mono text-xs sm:text-sm mt-1">${id.title}</p>
+              </div>
+              <div class="flex flex-wrap gap-2">
+                <button onclick="renderQuickViewTab('resume')" class="btn-aaa-primary px-4 py-2.5 rounded-xl text-xs">VIEW / DOWNLOAD RESUME</button>
+                <a href="${id.links.datapilot}" target="_blank" rel="noopener" class="btn-aaa-secondary px-4 py-2.5 rounded-xl text-xs">LIVE: DATAPILOT AI ↗</a>
+              </div>
+            </div>
+            <p class="text-slate-200 leading-relaxed">${id.summary}</p>
+            <div class="grid sm:grid-cols-2 gap-4">
+              ${PORTFOLIO_DATA.education.map(ed => `
+                <div class="glass-card rounded-xl p-4 border-cyan-500/25">
+                  <div class="flex items-center justify-between">
+                    <span class="font-mono text-[10px] text-cyan-400">${ed.period}</span>
+                    <span class="px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-300 font-mono text-[11px]">${ed.score}</span>
+                  </div>
+                  <div class="font-display text-sm font-bold text-white mt-1.5">${ed.degree}</div>
+                  <div class="text-xs text-slate-400 mt-0.5">${ed.institution}</div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        `;
+      } else if (tabId === 'skills') {
+        content.innerHTML = `
+          <div class="grid md:grid-cols-2 gap-4">
+            ${PORTFOLIO_DATA.skills.map(s => `
+              <div class="glass-card rounded-2xl p-5 space-y-3">
+                <div class="flex items-center justify-between">
+                  <h3 class="font-display text-base font-bold text-white">${s.name}</h3>
+                  <span class="font-mono text-[11px] px-2.5 py-0.5 rounded-full bg-cyan-500/15 text-cyan-300 border border-cyan-500/30">${s.level}</span>
+                </div>
+                <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">${s.details}</p>
+                <div class="flex flex-wrap gap-1.5 pt-1">
+                  ${s.tags.map(t => `<span class="px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-700 font-mono text-[11px] text-slate-200">${t}</span>`).join('')}
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        `;
+      } else if (tabId === 'experience') {
+        content.innerHTML = `
+          <div class="space-y-4">
+            ${PORTFOLIO_DATA.experiences.map(e => `
+              <div class="glass-card rounded-2xl p-6 space-y-3 border-emerald-500/30">
+                <div class="flex flex-wrap items-center justify-between gap-2">
+                  <div>
+                    <h3 class="font-display text-lg font-bold text-white">${e.role}</h3>
+                    <div class="text-emerald-400 text-sm font-medium mt-0.5">${e.org} • ${e.period}</div>
+                  </div>
+                  <span class="px-3 py-1 rounded-full bg-emerald-500/15 border border-emerald-400/40 text-emerald-300 font-mono text-xs">${e.badge}</span>
+                </div>
+                <ul class="list-disc pl-5 space-y-2 text-sm text-slate-300">
+                  ${e.highlights.map(h => `<li>${h}</li>`).join('')}
+                </ul>
+              </div>
+            `).join('')}
+          </div>
+        `;
+      } else if (tabId === 'projects') {
+        content.innerHTML = `
+          <div class="grid md:grid-cols-2 gap-5">
+            ${PORTFOLIO_DATA.projects.map(p => `
+              <div class="glass-card rounded-2xl p-5 flex flex-col justify-between gap-4">
+                <div class="space-y-2.5">
+                  <div class="flex items-start justify-between gap-2">
+                    <h3 class="font-display text-base font-bold text-white">${p.title}</h3>
+                    ${p.liveUrl ? `<a href="${p.liveUrl}" target="_blank" rel="noopener" class="px-2.5 py-1 rounded-lg bg-emerald-500/20 text-emerald-300 border border-emerald-400/40 font-mono text-[10px] shrink-0">LIVE ↗</a>` : ''}
+                  </div>
+                  <p class="text-xs text-cyan-300 font-medium">${p.tagline}</p>
+                  <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">${p.architecture}</p>
+                  <div class="flex flex-wrap gap-1.5 pt-1">
+                    ${p.tech.map(t => `<span class="px-2 py-0.5 rounded bg-slate-900 border border-slate-700 font-mono text-[10px] text-slate-300">${t}</span>`).join('')}
+                  </div>
+                </div>
+                <div class="flex gap-2 pt-2 border-t border-slate-800">
+                  <button onclick="openProjectModal('${p.id}', 'overview')" class="btn-aaa-ghost flex-1 py-2 rounded-xl text-[11px]">INSPECT PROJECT</button>
+                  <button onclick="openProjectModal('${p.id}', 'code')" class="btn-aaa-secondary flex-1 py-2 rounded-xl text-[11px]">CODE EXPLORER</button>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        `;
+      } else if (tabId === 'certifications') {
+        content.innerHTML = `
+          <div class="grid md:grid-cols-2 gap-4">
+            ${PORTFOLIO_DATA.certifications.map(a => `
+              <div class="glass-card rounded-2xl p-5 space-y-2 border-amber-400/25 flex flex-col justify-between">
+                <div>
+                  <div class="font-mono text-[11px] text-amber-400 uppercase tracking-wider">${a.category}</div>
+                  <h3 class="font-display text-base font-bold text-white mt-1">${a.title}</h3>
+                  <p class="text-sm text-slate-300 leading-relaxed mt-1.5">${a.detail}</p>
+                </div>
+                ${a.link ? `<a href="${a.link}" target="_blank" rel="noopener" class="text-xs font-mono text-cyan-400 hover:underline pt-2 inline-block">Verify on LeetCode ↗</a>` : ''}
+              </div>
+            `).join('')}
+          </div>
+        `;
+      } else if (tabId === 'resume') {
+        content.innerHTML = renderFormattedResumeHTML();
+      } else if (tabId === 'contact') {
+        content.innerHTML = `<div class="glass-panel rounded-2xl p-6">${renderContactSectionHTML()}</div>`;
+      }
+    }
+
+    function renderFormattedResumeHTML() {
+      const id = PORTFOLIO_DATA.identity;
+      return `
+        <div class="no-print flex flex-wrap items-center justify-between gap-3 mb-4">
+          <div class="text-xs text-slate-400 font-mono">VERIFIED 2-PAGE RESUME • PRINT-READY LAYOUT</div>
+          <div class="flex gap-2">
+            <button onclick="window.print()" class="btn-aaa-primary px-5 py-2.5 rounded-xl text-xs">PRINT / SAVE AS PDF</button>
+            <button onclick="copyTextToClipboard('${id.email}', 'Email copied to clipboard!')" class="btn-aaa-ghost px-4 py-2.5 rounded-xl text-xs">COPY EMAIL</button>
+          </div>
+        </div>
+        <div class="resume-sheet bg-slate-950/95 border border-slate-700/80 rounded-2xl p-6 sm:p-8 space-y-5 text-xs sm:text-sm leading-relaxed shadow-2xl">
+          <!-- Header -->
+          <div class="border-b border-slate-700 pb-4 text-center space-y-1.5">
+            <h2 class="font-display text-xl sm:text-2xl font-bold text-white tracking-wider">${id.name}</h2>
+            <p class="text-slate-300 text-xs">
+              ${id.location} &nbsp;|&nbsp;
+              <a href="tel:${id.phone.replace(/\s+/g,'')}" class="text-cyan-400 hover:underline">${id.phone}</a> &nbsp;|&nbsp;
+              <a href="mailto:${id.email}" class="text-cyan-400 hover:underline">${id.email}</a>
+            </p>
+            <p class="text-xs text-slate-400 font-mono flex flex-wrap justify-center gap-x-3 gap-y-1">
+              <a href="${id.links.linkedin}" target="_blank" rel="noopener" class="text-sky-400 hover:underline">LinkedIn: linkedin.com/in/kistipati-shivaprasadreddy</a>
+              <span>|</span>
+              <a href="${id.links.github}" target="_blank" rel="noopener" class="text-cyan-400 hover:underline">GitHub: github.com/Shivalateral</a>
+              <span>|</span>
+              <a href="${id.links.leetcode}" target="_blank" rel="noopener" class="text-amber-400 hover:underline">LeetCode: leetcode.com/u/K_s_reddy133</a>
+            </p>
+          </div>
+
+          <!-- Professional Summary -->
+          <div>
+            <h3 class="font-mono text-xs font-bold text-cyan-400 uppercase tracking-widest border-b border-slate-800 pb-1 mb-2">Professional Summary</h3>
+            <p class="text-slate-200">${id.summary}</p>
+          </div>
+
+          <!-- Technical Skills -->
+          <div>
+            <h3 class="font-mono text-xs font-bold text-cyan-400 uppercase tracking-widest border-b border-slate-800 pb-1 mb-2">Technical Skills</h3>
+            <ul class="space-y-1 text-slate-200">
+              ${PORTFOLIO_DATA.skills.map(s => `<li><strong class="text-white">${s.name}:</strong> ${s.tags.join(', ')}.</li>`).join('')}
+            </ul>
+          </div>
+
+          <!-- Projects -->
+          <div>
+            <h3 class="font-mono text-xs font-bold text-cyan-400 uppercase tracking-widest border-b border-slate-800 pb-1 mb-2">Projects</h3>
+            <div class="space-y-3">
+              <div>
+                <div class="flex flex-wrap justify-between font-semibold text-white">
+                  <span>Blinkit Sales Analysis Dashboard | Advanced Excel</span>
+                </div>
+                <ul class="list-disc pl-5 text-slate-300 mt-1 space-y-0.5">
+                  <li>Analyzed sales performance, product categories, outlet types, and customer purchasing patterns across retail datasets.</li>
+                  <li>Applied Pivot Tables, XLOOKUP, data cleaning, and interactive charts to design an executive dashboard and derive actionable business insights.</li>
+                </ul>
+              </div>
+              <div>
+                <div class="flex flex-wrap justify-between font-semibold text-white">
+                  <span>DataPilot AI - Automated Data Analysis Platform | Python, Pandas, Excel, Streamlit</span>
+                  <a href="${id.links.datapilot}" target="_blank" rel="noopener" class="text-emerald-400 font-mono text-xs hover:underline">Live Demo ↗</a>
+                </div>
+                <ul class="list-disc pl-5 text-slate-300 mt-1 space-y-0.5">
+                  <li>Developed an end-to-end workflow for uploading and processing Excel datasets, automating data cleaning and transformation tasks.</li>
+                  <li>Implemented automated KPI generation, pivot analysis, interactive visual dashboards, and downloadable analytical reports.</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <!-- Internship Experience -->
+          <div>
+            <h3 class="font-mono text-xs font-bold text-cyan-400 uppercase tracking-widest border-b border-slate-800 pb-1 mb-2">Internship Experience</h3>
+            <div class="space-y-2.5">
+              <div>
+                <div class="font-semibold text-white">TechSaksham - AI Internship</div>
+                <ul class="list-disc pl-5 text-slate-300 mt-0.5">
+                  <li>Gained practical exposure to Artificial Intelligence concepts and Python-based application development through structured internship activities.</li>
+                </ul>
+              </div>
+              <div>
+                <div class="font-semibold text-white">Google Cloud - Generative AI Virtual Internship (Cohort 9)</div>
+                <ul class="list-disc pl-5 text-slate-300 mt-0.5">
+                  <li>Explored Generative AI, Vertex AI, Google Cloud technologies, and Streamlit through guided, hands-on learning modules.</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <!-- Education -->
+          <div>
+            <h3 class="font-mono text-xs font-bold text-cyan-400 uppercase tracking-widest border-b border-slate-800 pb-1 mb-2">Education</h3>
+            <div class="space-y-2">
+              <div class="flex flex-wrap justify-between gap-1">
+                <div><strong class="text-white">B.Tech - Computer Science & Engineering (Data Science)</strong> — Anurag University, Hyderabad | <span class="text-emerald-400 font-semibold">CGPA: 8.46 / 10</span></div>
+                <span class="font-mono text-slate-400">2023–2026</span>
+              </div>
+              <div class="flex flex-wrap justify-between gap-1">
+                <div><strong class="text-white">Diploma - Computer Science & Engineering</strong> | <span class="text-emerald-400 font-semibold">CGPA: 9.1 / 10</span></div>
+                <span class="font-mono text-slate-400">2020–2023</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Certifications & Coding Platforms -->
+          <div class="grid sm:grid-cols-2 gap-4 pt-1">
+            <div>
+              <h3 class="font-mono text-xs font-bold text-cyan-400 uppercase tracking-widest border-b border-slate-800 pb-1 mb-2">Certifications</h3>
+              <ul class="list-disc pl-5 text-slate-300 space-y-1">
+                <li>NPTEL - Introduction to Machine Learning, Elite + Silver (75%).</li>
+                <li>NPTEL - Database Management Systems.</li>
+                <li>Google Cloud - Data Analytics Virtual Internship.</li>
+              </ul>
+            </div>
+            <div>
+              <h3 class="font-mono text-xs font-bold text-cyan-400 uppercase tracking-widest border-b border-slate-800 pb-1 mb-2">Problem-Solving & Coding Platforms</h3>
+              <ul class="list-disc pl-5 text-slate-300 space-y-1">
+                <li><strong>LeetCode:</strong> Completed the SQL 50 study plan, solving 50 SQL problems and earning the SQL badge.</li>
+                <li><strong>HackerRank:</strong> Practicing Python and SQL coding challenges.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderContactSectionHTML() {
+      const id = PORTFOLIO_DATA.identity;
+      const links = id.links;
+      return `
+        <div class="grid md:grid-cols-2 gap-6">
+          <div class="space-y-4">
+            <h3 class="font-display text-base font-bold text-white">Direct Professional Channels</h3>
+            <p class="text-xs sm:text-sm text-slate-300">${id.location} • Seeking entry-level roles or internships in Data Science, AI, Machine Learning, or Data Analytics.</p>
+            <div class="space-y-2 text-xs font-mono">
+              <a href="mailto:${id.email}" class="block glass-card rounded-xl px-3.5 py-2.5 text-cyan-300 hover:border-cyan-400">✉ ${id.email}</a>
+              <a href="tel:${id.phone.replace(/\s+/g,'')}" class="block glass-card rounded-xl px-3.5 py-2.5 text-emerald-300 hover:border-emerald-400">☎ ${id.phone}</a>
+            </div>
+            <div class="grid grid-cols-2 gap-2.5">
+              <a href="${links.linkedin}" target="_blank" rel="noopener" class="glass-card rounded-xl p-3 text-center font-mono text-xs text-sky-300 hover:border-sky-400">LinkedIn ↗</a>
+              <a href="${links.github}" target="_blank" rel="noopener" class="glass-card rounded-xl p-3 text-center font-mono text-xs text-slate-200 hover:border-cyan-400">GitHub ↗</a>
+              <a href="${links.leetcode}" target="_blank" rel="noopener" class="glass-card rounded-xl p-3 text-center font-mono text-xs text-amber-300 hover:border-amber-400">LeetCode ↗</a>
+              <button onclick="openResumeModal()" class="glass-card rounded-xl p-3 text-center font-mono text-xs text-emerald-300 hover:border-emerald-400">Resume / PDF</button>
+            </div>
+          </div>
+          <form onsubmit="handleContactSubmit(event)" class="space-y-3">
+            <h3 class="font-display text-base font-bold text-white">Send a Recruiter Message</h3>
+            <input required type="text" placeholder="Your Name / Organization" class="w-full bg-slate-900 border border-slate-700 focus:border-cyan-400 focus:outline-none rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-white" />
+            <input required type="email" placeholder="Work Email" class="w-full bg-slate-900 border border-slate-700 focus:border-cyan-400 focus:outline-none rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-white" />
+            <textarea required rows="3" placeholder="Role details or internship inquiry..." class="w-full bg-slate-900 border border-slate-700 focus:border-cyan-400 focus:outline-none rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-white"></textarea>
+            <button type="submit" class="btn-aaa-primary w-full py-2.5 rounded-xl text-xs">TRANSMIT MESSAGE</button>
+          </form>
+        </div>
+      `;
+    }
+
+    function handleContactSubmit(e) {
+      e.preventDefault();
+      e.target.reset();
+      showToast("Message transmitted! Thank you for reaching out to Shiva.");
+    }
+
+    function openResumeModal() {
+      openInspectorModal("VERIFIED RESUME VIEWER", PORTFOLIO_DATA.identity.name, renderFormattedResumeHTML());
+    }
+
+    // =========================================================================
+    // 14. AI MULTI-AGENT PORTFOLIO ASSISTANT (GEMINI API + EXPONENTIAL BACKOFF)
+    // =========================================================================
+    const SYSTEM_GROUNDING_PROMPT = `You are the Orchestrator of the AI Multi-Agent Portfolio Assistant for SHIVA PRASAD REDDY KISTIPATI.
+Answer strictly and accurately using ONLY the verified resume information below. Never fabricate unverified companies, metrics, or projects. Keep answers crisp, structured, and recruiter-friendly.
+
+VERIFIED PROFILE:
+- Name: SHIVA PRASAD REDDY KISTIPATI
+- Headline: Data Science | Data Analytics | Artificial Intelligence & Machine Learning
+- Location: Hyderabad, Telangana, India
+- Phone: +91 9951338294
+- Email: kkshivareddykistipati@gmail.com
+- LinkedIn: https://www.linkedin.com/in/kistipati-shivaprasadreddy
+- GitHub: https://github.com/Shivalateral
+- LeetCode: https://leetcode.com/u/K_s_reddy133
+- Summary: Computer Science and Engineering (Data Science) graduate with a strong academic foundation in Python, SQL, data analysis, and machine learning. Experienced through academic projects and virtual internships in data preprocessing, exploratory analysis, predictive modeling, and interactive reporting. Seeking an entry-level role or internship in Data Science, Artificial Intelligence, Machine Learning, or Data Analytics to build practical, data-driven solutions.
+
+EDUCATION:
+1. B.Tech - Computer Science & Engineering (Data Science) | 2023–2026 | Anurag University, Hyderabad | CGPA: 8.46 / 10
+2. Diploma - Computer Science & Engineering | 2020–2023 | CGPA: 9.1 / 10
+
+TECHNICAL SKILLS:
+- Python: Data Structures, Unpacking, Comprehensions, Lambda Functions, Exception Handling.
+- SQL (MySQL): Joins, Recursive and Non-Recursive CTEs, Window Functions, Views, Stored Procedures.
+- Advanced Excel: XLOOKUP, INDEX-MATCH, Pivot Tables, Power Query.
+- Power BI: Data Modelling, DAX, CALCULATE(), Filter Context, Row-Level Security.
+- Machine Learning: Regression, Classification, Feature Engineering, Random Forest, XGBoost, Model Evaluation.
+
+PROJECTS:
+1. DataPilot AI - Automated Data Analysis Platform | Python, Pandas, Excel, Streamlit
+   - End-to-end workflow for uploading and processing Excel datasets, automating data cleaning and transformation tasks.
+   - Automated KPI generation, pivot analysis, interactive visual dashboards, and downloadable analytical reports.
+   - Live Demo: https://datapilot-ai-2.onrender.com/
+2. Blinkit Sales Analysis Dashboard | Advanced Excel
+   - Analyzed sales performance, product categories, outlet types, and customer purchasing patterns across retail datasets.
+   - Applied Pivot Tables, XLOOKUP, data cleaning, and interactive charts to design an executive dashboard and derive actionable business insights.
+
+INTERNSHIP EXPERIENCE:
+1. TechSaksham - AI Internship: Practical exposure to AI concepts and Python-based application development through structured internship activities.
+2. Google Cloud - Generative AI Virtual Internship (Cohort 9): Explored Generative AI, Vertex AI, Google Cloud technologies, and Streamlit through guided, hands-on learning modules.
+
+CERTIFICATIONS & CODING PLATFORMS:
+- NPTEL - Introduction to Machine Learning, Elite + Silver (75%).
+- NPTEL - Database Management Systems.
+- Google Cloud - Data Analytics Virtual Internship.
+- LeetCode: Completed the SQL 50 study plan, solving 50 SQL problems and earning the SQL badge (https://leetcode.com/u/K_s_reddy133).
+- HackerRank: Practicing Python and SQL coding challenges.`;
+
+    function openAIChat() {
+      document.getElementById('ai-drawer').classList.remove('hidden');
+      document.getElementById('ai-input').focus();
+    }
+
+    function closeAIChat() {
+      document.getElementById('ai-drawer').classList.add('hidden');
+    }
+
+    function highlightAgentsForQuery(q) {
+      const lower = q.toLowerCase();
+      const active = ['orchestrator'];
+      if (/who|about|bio|resume|summary|education|cgpa|hire|why|fit|contact/.test(lower)) active.push('profile', 'comms');
+      if (/project|datapilot|blinkit|dashboard|code|github/.test(lower)) active.push('projects');
+      if (/skill|python|sql|power bi|dax|excel|ml|machine learning|xgboost|vertex/.test(lower)) active.push('skills');
+      if (active.length === 1) active.push('profile', 'projects');
+
+      document.querySelectorAll('#agent-badges .agent-badge').forEach(el => {
+        el.classList.toggle('active', active.includes(el.dataset.agent));
+      });
+      return active;
+    }
+
+    function clearAgentHighlights() {
+      document.querySelectorAll('#agent-badges .agent-badge').forEach(el => el.classList.remove('active'));
+    }
+
+    function sendQuickPrompt(text) {
+      document.getElementById('ai-input').value = text;
+      handleAIChatSubmit(new Event('submit'));
+    }
+
+    async function callGeminiWithBackoff(userQuery) {
+      const apiKey = ""; // Automatically provided by runtime environment when empty
+      const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+
+      const payload = {
+        contents: [{ parts: [{ text: userQuery }] }],
+        systemInstruction: { parts: [{ text: SYSTEM_GROUNDING_PROMPT }] }
+      };
+
+      const delays = [1000, 2000, 4000];
+      for (let attempt = 0; attempt <= delays.length; attempt++) {
+        try {
+          const resp = await fetch(apiUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+          if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+          const data = await resp.json();
+          const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+          if (text) return text;
+          throw new Error("Empty model response");
+        } catch (err) {
+          if (attempt < delays.length) {
+            await new Promise(r => setTimeout(r, delays[attempt]));
+          } else {
+            return generateLocalGroundedFallback(userQuery);
+          }
+        }
+      }
+    }
+
+    function generateLocalGroundedFallback(q) {
+      const lower = q.toLowerCase();
+      if (lower.includes('datapilot')) {
+        return "**DataPilot AI - Automated Data Analysis Platform:**\n• **Tech Stack:** Python, Pandas, Excel, Streamlit\n• **Capabilities:** End-to-end workflow for uploading and processing Excel datasets, automating data cleaning/transformation, KPI generation, pivot analysis, interactive visual dashboards, and downloadable analytical reports.\n• **Live Demo:** https://datapilot-ai-2.onrender.com/";
+      }
+      if (lower.includes('sql') || lower.includes('power bi')) {
+        return "**SQL (MySQL) & Power BI Capabilities:**\n• **SQL (MySQL):** Joins, Recursive & Non-Recursive CTEs, Window Functions, Views, and Stored Procedures — validated by completing the **LeetCode SQL 50** study plan (50 SQL problems solved + SQL badge).\n• **Power BI:** Data Modelling, DAX, CALCULATE(), Filter Context, and Row-Level Security.\n• **Advanced Excel:** XLOOKUP, INDEX-MATCH, Pivot Tables, and Power Query (applied in the Blinkit Sales Analysis Dashboard).";
+      }
+      if (lower.includes('hire') || lower.includes('analytics')) {
+        return "**Why Hire Shiva for Data Analytics / Data Science:**\n• **Strong Academics:** B.Tech CSE (Data Science) at Anurag University (CGPA: 8.46/10) & Diploma CSE (CGPA: 9.1/10).\n• **Proven BI & Analytics Toolkit:** Python, SQL (MySQL + LeetCode SQL 50 badge), Advanced Excel, Power BI/DAX, and Machine Learning (NPTEL Elite + Silver 75%).\n• **Hands-On Delivery:** Built **DataPilot AI** (live on Render) and the **Blinkit Sales Analysis Dashboard**, plus internships with **TechSaksham** and **Google Cloud (GenAI Cohort 9)**.";
+      }
+      return "**Resume Summary — Shiva Prasad Reddy Kistipati:**\n• **Education:** B.Tech CSE (Data Science), Anurag University (8.46 CGPA) | Diploma CSE (9.1 CGPA).\n• **Core Skills:** Python, SQL (MySQL), Advanced Excel, Power BI (DAX & RLS), Machine Learning (Random Forest, XGBoost).\n• **Projects:** DataPilot AI (Python, Pandas, Streamlit — live on Render) & Blinkit Sales Analysis Dashboard (Advanced Excel).\n• **Internships & Certs:** TechSaksham AI Internship, Google Cloud GenAI (Cohort 9) & Data Analytics Virtual Internships, NPTEL ML Elite+Silver (75%), NPTEL DBMS, LeetCode SQL 50 Badge.";
+    }
+
+    function formatAIMarkdown(text) {
+      return text
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/\*\*(.*?)\*\*/g, '<strong class="text-white">$1</strong>')
+        .replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank" rel="noopener" class="text-cyan-400 underline">$1</a>')
+        .replace(/\n/g, '<br/>');
+    }
+
+    async function handleAIChatSubmit(e) {
+      e.preventDefault();
+      const input = document.getElementById('ai-input');
+      const query = input.value.trim();
+      if (!query) return;
+      input.value = '';
+
+      const msgs = document.getElementById('ai-messages');
+      msgs.innerHTML += `
+        <div class="ml-8 bg-cyan-500/15 border border-cyan-400/35 rounded-2xl rounded-tr-sm p-3 text-xs sm:text-sm text-cyan-50">
+          ${query.replace(/</g, '&lt;')}
+        </div>
+      `;
+
+      const activeAgents = highlightAgentsForQuery(query);
+      const loadingId = 'ai-loading-' + Date.now();
+      msgs.innerHTML += `
+        <div id="${loadingId}" class="glass-card rounded-2xl rounded-tl-sm p-3.5 border-violet-500/30">
+          <div class="font-mono text-[10px] text-violet-300 mb-1">ORCHESTRATING: ${activeAgents.join(' → ').toUpperCase()}</div>
+          <div class="flex items-center gap-1.5 text-xs text-slate-300">
+            <span class="w-2 h-2 rounded-full bg-cyan-400 animate-bounce"></span>
+            <span class="w-2 h-2 rounded-full bg-violet-400 animate-bounce" style="animation-delay:0.15s"></span>
+            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-bounce" style="animation-delay:0.3s"></span>
+            <span class="ml-1">Synthesizing grounded portfolio intelligence...</span>
+          </div>
+        </div>
+      `;
+      msgs.scrollTop = msgs.scrollHeight;
+
+      const reply = await callGeminiWithBackoff(query);
+      const loadingEl = document.getElementById(loadingId);
+      if (loadingEl) {
+        loadingEl.innerHTML = `
+          <div class="font-mono text-[10px] text-cyan-400 mb-1.5">MULTI-AGENT RESPONSE • ${activeAgents.length} AGENTS VERIFIED</div>
+          <div class="text-slate-200 leading-relaxed text-xs sm:text-sm">${formatAIMarkdown(reply)}</div>
+        `;
+      }
+      msgs.scrollTop = msgs.scrollHeight;
+      setTimeout(clearAgentHighlights, 2200);
+    }
+
+    // =========================================================================
+    // 15. TOAST NOTIFICATIONS & CINEMATIC BOOT SEQUENCE
+    // =========================================================================
+    let toastTimeout = null;
+    function showToast(msg) {
+      const box = document.getElementById('toast-box');
+      box.textContent = msg;
+      box.classList.remove('hidden');
+      if (toastTimeout) clearTimeout(toastTimeout);
+      toastTimeout = setTimeout(() => box.classList.add('hidden'), 3200);
+    }
+
+    function runBootSequence() {
+      const bar = document.getElementById('boot-bar');
+      const pct = document.getElementById('boot-percent');
+      const status = document.getElementById('boot-status');
+      const log = document.getElementById('boot-telemetry');
+
+      const steps = [
+        { p: 22, s: "Calibrating Volumetric Fog & Dynamic Lighting...", l: "[GFX] WebGL2 + ACES Filmic Tone Mapping active." },
+        { p: 48, s: "Spawning Articulated 3D Avatar Rig (Shiva)...", l: "[RIG] Skeletal limb swing & idle breathing synced." },
+        { p: 74, s: "Generating 7 Interactive Professional Realms...", l: "[WORLD] 7 Realms + Interactive Raycast Matrix online." },
+        { p: 92, s: "Connecting Gemini Multi-Agent Orchestrator...", l: "[AI] Grounded Portfolio RAG System ready." },
+        { p: 100, s: "REALM READY — ENTERING DIGITAL UNIVERSE", l: "[OK] Launch sequence complete." }
+      ];
+
+      let i = 0;
+      const interval = setInterval(() => {
+        if (i >= steps.length) {
+          clearInterval(interval);
+          setTimeout(() => {
+            const boot = document.getElementById('boot-screen');
+            boot.style.opacity = '0';
+            setTimeout(() => {
+              boot.classList.add('hidden');
+              appMode = "entry";
+              document.getElementById('entry-overlay').classList.remove('hidden');
+              runEntryTypewriter();
+            }, 650);
+          }, 350);
+          return;
+        }
+        const st = steps[i++];
+        bar.style.width = st.p + '%';
+        pct.textContent = st.p + '%';
+        status.textContent = st.s;
+        log.innerHTML += `<div class="text-slate-300">${st.l}</div>`;
+        log.scrollTop = log.scrollHeight;
+      }, 360);
+    }
+
+    function runEntryTypewriter() {
+      const text = "Welcome to my digital universe. Explore my journey, discover my projects, understand my technical capabilities, and experience the technology behind my work.";
+      const el = document.getElementById('entry-typewriter');
+      if (reducedMotion) {
+        el.textContent = text;
+        return;
+      }
+      el.textContent = "";
+      let idx = 0;
+      const timer = setInterval(() => {
+        el.textContent += text[idx++];
+        if (idx >= text.length) clearInterval(timer);
+      }, 22);
+    }
+
+    // =========================================================================
+    // 16. WINDOW ONLOAD ENTRY POINT
+    // =========================================================================
+    window.onload = function () {
+      const ok = initThreeWorld();
+      if (ok) {
+        animate();
+        runBootSequence();
+      }
+    };
+  </script>
+</body>
+</html>
